@@ -248,8 +248,8 @@ else
 
 	if [ "${WINE_BRANCH}" = "staging" ]; then
 		if [ "${WINE_VERSION}" = "git" ]; then
-			git clone https://github.com/wine-staging/wine-staging wine-staging-"${WINE_VERSION}"
-
+			#git clone https://github.com/wine-staging/wine-staging wine-staging-"${WINE_VERSION}"
+			git clone https://github.com/Lolmc0587/office-wine-fix.git
 			upstream_commit="$(cat wine-staging-"${WINE_VERSION}"/staging/upstream-commit | head -c 7)"
 			git -C wine checkout "${upstream_commit}"
 			BUILD_NAME="${WINE_VERSION}-${upstream_commit}-staging"
