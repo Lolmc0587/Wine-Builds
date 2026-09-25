@@ -189,6 +189,9 @@ echo "Downloading the source code and patches"
 echo "Preparing Wine for compilation"
 echo
 
+wget https://raw.githubusercontent.com/LilFishyChan/proton-ge-custom/37176fcd7808d0110287aa674229778c8665a7ee/patches/wine-hotfixes/qcap-dshow-fixes/0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch
+wget https://raw.githubusercontent.com/LilFishyChan/proton-ge-custom/37176fcd7808d0110287aa674229778c8665a7ee/patches/wine-hotfixes/qcap-dshow-fixes/0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch
+
 if [ -n "${CUSTOM_SRC_PATH}" ]; then
 	is_url="$(echo "${CUSTOM_SRC_PATH}" | head -c 6)"
 
@@ -215,7 +218,7 @@ elif [ "$WINE_BRANCH" = "staging-tkg" ] || [ "$WINE_BRANCH" = "staging-tkg-fsync
 
 	WINE_VERSION="$(cat wine/VERSION | tail -c +14)"
 	BUILD_NAME="${WINE_VERSION}"-"${WINE_BRANCH}"
-	patch -d wine -Np1 < qcap-fix.diff
+	# patch -d wine -Np1 < qcap-fix.diff
 elif [ "$WINE_BRANCH" = "proton" ]; then
 	if [ -z "${PROTON_BRANCH}" ]; then
 		git clone https://github.com/ValveSoftware/wine
@@ -289,6 +292,9 @@ else
 		cd "${BUILD_DIR}" || exit 1
 	fi
 fi
+# patch all type of wine
+patch -d wine*/ -Np1 < 0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch
+patch -d wine*/ -Np1 < 0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch
 
 if [ ! -d wine ]; then
 	clear
