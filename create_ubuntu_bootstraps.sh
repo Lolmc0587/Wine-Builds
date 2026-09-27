@@ -34,7 +34,7 @@ export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}32_chroot
 prepare_chroot () {
 	if [ "$1" = "32" ]; then
 		CHROOT_PATH="${CHROOT_X32}"
-	else if [ "$1" = "64" ]; then
+	elif [ "$1" = "64" ]; then
 		CHROOT_PATH="${CHROOT_X64}"
 	else
 	    CHROOT_PATH="${CHROOT_ARM64}"
