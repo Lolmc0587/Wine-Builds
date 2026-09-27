@@ -270,9 +270,11 @@ debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
 debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 
 create_build_scripts
+
+prepare_chroot aarch64
 prepare_chroot 32
 prepare_chroot 64
-prepare_chroot aarch64
+
 
 rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
 rm "${CHROOT_X64}"/opt/prepare_chroot.sh
