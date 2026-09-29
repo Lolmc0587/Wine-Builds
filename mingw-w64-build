@@ -164,6 +164,12 @@ build()
     if [ "$arch" = "i586" ] || [ "$arch" = "i686" ]; then
         local x86_dwarf2="--disable-sjlj-exceptions --with-dwarf2"
         local crt_lib="--enable-lib32 --disable-lib64"
+    elif [ "$arch" = "aarch64" ];  then
+        local x86_dwarf2=""
+        local crt_lib="--disable-lib32 --disable-lib64 --enable-libarm64"
+    elif [ "$arch" = "arm64ec" ]; then
+        local x86_dwarf2=""
+        local crt_lib="--disable-lib32 --disable-lib64 --enable-libarm64 --enable-arm64x"
     else
         local x86_dwarf2=""
         local crt_lib="--enable-lib64 --disable-lib32"
