@@ -193,7 +193,7 @@ ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
 bash mingw-w64-build aarch64
 bash mingw-w64-build arm64ec
 # bash mingw-w64-build x86_64
-bash mingw-w64-build i686
+#bash mingw-w64-build i686
 export CC=gcc-12
 export CXX=g++-12
 export CFLAGS="-O2"
@@ -281,7 +281,7 @@ debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 create_build_scripts
 
 prepare_chroot aarch64
-prepare_chroot 32
+# prepare_chroot 32
 # prepare_chroot 64
 
 
