@@ -21,6 +21,15 @@ jobs:
           cd /opt
           sudo tar -I "xz -T0 -9" -cpf bootstraps.tar.xz chroots
           sha256sum *.tar.xz
+      - name: Upload all build logs and artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-failure-logs
+          path: |
+            /opt/mingw/*.log
+            /opt/mingw/bld/**/*.log
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
           name: Bootstraps

@@ -59,6 +59,13 @@ prepare_chroot () {
 	echo "Chrooting into ${CHROOT_PATH}"
 	chroot "${CHROOT_PATH}" /usr/bin/env LANG=en_US.UTF-8 TERM=xterm PATH="/bin:/sbin:/usr/bin:/usr/sbin" /opt/prepare_chroot.sh
 
+	mkdir -p /opt/mingw
+    if [ -f "${CHROOT_PATH}/opt/mingw/build.log" ]; then
+        echo "Copying MinGW log from chroot to host /opt/mingw/build.log..."
+        cp "${CHROOT_PATH}/opt/mingw/build.log" "/opt/mingw/build_${arch_name}.log"
+        cp "${CHROOT_PATH}/opt/mingw/build.log" "/opt/mingw/build.log"
+    fi
+
 	echo "Unmount chroot directories"
 	umount -l "${CHROOT_PATH}"
 	umount "${CHROOT_PATH}"/proc
@@ -275,7 +282,7 @@ create_build_scripts
 
 prepare_chroot aarch64
 prepare_chroot 32
-prepare_chroot 64
+# prepare_chroot 64
 
 
 rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
