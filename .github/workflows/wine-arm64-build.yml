@@ -1,0 +1,42 @@
+name: Wine Git arm64 CI
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # Kích hoạt kiến trúc i386 để cài đặt các thư viện 32-bit (cho tiến trình WoW64)
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+
+          # Cài đặt trực tiếp các công cụ build Wine lên host
+          sudo apt-get install -y perl git wget xz-utils autoconf flex bison \
+            build-essential gcc-mingw-w64 pkg-config \
+            libx11-dev libfreetype-dev libx11-dev:i386 libfreetype-dev:i386
+
+      # --- LƯU Ý CHUỖI CÔNG CỤ (TOOLCHAIN) ---
+      # Nếu bạn sử dụng bộ Clang MinGW / FEX tự build từ cấu hình trước,
+      # bạn cần thêm step tải artifact toolchain đó tại đây và giải nén vào /opt/mingw
+      # để build_wine.sh có thể tìm thấy compiler.
+
+      - name: Build Wine
+        run: |
+          chmod +x build_wine.sh
+          export WINE_VERSION="git"
+          WINE_BRANCH=vanilla ./build_wine.sh
+          # WINE_BRANCH=staging ./build_wine.sh
+          sha256sum *.tar.xz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Wine-Git
+          path: ./*.tar.xz
