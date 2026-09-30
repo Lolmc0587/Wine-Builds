@@ -19,52 +19,38 @@ export CHROOT_DISTRO="bionic"
 export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
 
 export MAINDIR=/opt/chroots
-export CHROOT_ARM64="${MAINDIR}/${CHROOT_DISTRO}arm64_chroot"
+export CHROOT_ARM64="${MAINDIR}/${CHROOT_DISTRO}_arm64_chroot"
 
-# Toolchain configuration
-export TOOLCHAIN_URL="https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-aarch64.tar.xz"
-export TOOLCHAIN_DIR="/opt/mingw"
-
-echo "Downloading and extracting llvm-mingw toolchain to the host..."
-mkdir -p "${TOOLCHAIN_DIR}"
-wget -q --show-progress -O llvm-mingw.tar.xz "${TOOLCHAIN_URL}"
-tar xf llvm-mingw.tar.xz -C "${TOOLCHAIN_DIR}" --strip-components=1
-rm llvm-mingw.tar.xz
 
 prepare_chroot () {
     CHROOT_PATH="${CHROOT_ARM64}"
 
-    echo "Unmount chroot directories. Just in case."
-    umount -Rl "${CHROOT_PATH}" || true
+	echo "Unmount chroot directories. Just in case."
+	umount -Rl "${CHROOT_PATH}"
 
-    echo "Mount directories for chroot"
-    mount --bind "${CHROOT_PATH}" "${CHROOT_PATH}"
-    mount -t proc /proc "${CHROOT_PATH}"/proc
-    mount --bind /sys "${CHROOT_PATH}"/sys
-    mount --make-rslave "${CHROOT_PATH}"/sys
-    mount --bind /dev "${CHROOT_PATH}"/dev
-    mount --bind /dev/pts "${CHROOT_PATH}"/dev/pts
-    mount --bind /dev/shm "${CHROOT_PATH}"/dev/shm
-    mount --make-rslave "${CHROOT_PATH}"/dev
+	echo "Mount directories for chroot"
+	mount --bind "${CHROOT_PATH}" "${CHROOT_PATH}"
+	mount -t proc /proc "${CHROOT_PATH}"/proc
+	mount --bind /sys "${CHROOT_PATH}"/sys
+	mount --make-rslave "${CHROOT_PATH}"/sys
+	mount --bind /dev "${CHROOT_PATH}"/dev
+	mount --bind /dev/pts "${CHROOT_PATH}"/dev/pts
+	mount --bind /dev/shm "${CHROOT_PATH}"/dev/shm
+	mount --make-rslave "${CHROOT_PATH}"/dev
 
-    rm -f "${CHROOT_PATH}/etc/resolv.conf"
-    cp /etc/resolv.conf "${CHROOT_PATH}/etc/resolv.conf"
+	rm -f "${CHROOT_PATH}"/etc/resolv.conf
+	cp /etc/resolv.conf "${CHROOT_PATH}"/etc/resolv.conf
 
-    # Bind toolchain into chroot so it can be used during preparation
-    mkdir -p "${CHROOT_PATH}/opt/mingw"
-    mount --bind "${TOOLCHAIN_DIR}" "${CHROOT_PATH}/opt/mingw"
+	echo "Chrooting into ${CHROOT_PATH}"
+	chroot "${CHROOT_PATH}" /usr/bin/env LANG=en_US.UTF-8 TERM=xterm PATH="/bin:/sbin:/usr/bin:/usr/sbin" /opt/prepare_chroot.sh
 
-    echo "Chrooting into ${CHROOT_PATH}"
-    chroot "${CHROOT_PATH}" /usr/bin/env LANG=en_US.UTF-8 TERM=xterm PATH="/opt/mingw/bin:/bin:/sbin:/usr/bin:/usr/sbin" /opt/prepare_chroot.sh
-
-    echo "Unmount chroot directories"
-    umount -l "${CHROOT_PATH}/opt/mingw"
-    umount -l "${CHROOT_PATH}"
-    umount "${CHROOT_PATH}/proc"
-    umount "${CHROOT_PATH}/sys"
-    umount "${CHROOT_PATH}/dev/pts"
-    umount "${CHROOT_PATH}/dev/shm"
-    umount "${CHROOT_PATH}/dev"
+	echo "Unmount chroot directories"
+	umount -l "${CHROOT_PATH}"
+	umount "${CHROOT_PATH}"/proc
+	umount "${CHROOT_PATH}"/sys
+	umount "${CHROOT_PATH}"/dev/pts
+	umount "${CHROOT_PATH}"/dev/shm
+	umount "${CHROOT_PATH}"/dev
 }
 
 create_build_scripts () {
@@ -141,6 +127,11 @@ wget -O /usr/include/linux/ntsync.h https://raw.githubusercontent.com/zen-kernel
 wget -O /usr/include/linux/userfaultfd.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.15/main/include/uapi/linux/userfaultfd.h
 
 git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git -b 1.22
+
+mkdir -p /opt/mingw
+wget -q --show-progress -O llvm-mingw.tar.xz https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-aarch64.tar.xz
+tar xf llvm-mingw.tar.xz -C "/opt/mingw" --strip-components=1
+rm llvm-mingw.tar.xz
 
 # Extract archives
 for f in *.tar.*; do tar xf "\$f"; done
