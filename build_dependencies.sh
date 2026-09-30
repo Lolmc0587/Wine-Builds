@@ -1,29 +1,44 @@
 #!/usr/bin/env bash
 
 ## A script for creating Ubuntu bootstraps for Wine compilation.
+##
 ## debootstrap and perl are required
 ## root rights are required
+##
+## About 5.5 GB of free space is required
+## And additional 2.5 GB is required for Wine compilation
 
 if [ "$EUID" != 0 ]; then
-    echo "This script requires root rights!"
-    exit 1
+	echo "This script requires root rights!"
+	exit 1
 fi
 
 if ! command -v debootstrap 1>/dev/null || ! command -v perl 1>/dev/null; then
-    echo "Please install debootstrap and perl and run the script again"
-    exit 1
+	echo "Please install debootstrap and perl and run the script again"
+	exit 1
 fi
 
-# Upgraded to Jammy (22.04) because the llvm-mingw toolchain requires GLIBC_2.35
+# Keep in mind that although you can choose any version of Ubuntu/Debian
+# here, but this script has only been tested with Ubuntu 18.04 Bionic
 export CHROOT_DISTRO="bionic"
-export CHROOT_MIRROR="https://ftp.uni-stuttgart.de/ubuntu/"
+export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
 
+# Set your preferred path for storing chroots
+# Also don't forget to change the path to the chroots in the build_wine.sh
+# script, if you are going to use it
 export MAINDIR=/opt/chroots
-export CHROOT_ARM64="${MAINDIR}/${CHROOT_DISTRO}_arm64_chroot"
-
+export CHROOT_ARM64="${MAINDIR}"/${CHROOT_DISTRO}arm64_chroot
+export CHROOT_X64="${MAINDIR}"/${CHROOT_DISTRO}64_chroot
+export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}32_chroot
 
 prepare_chroot () {
-    CHROOT_PATH="${CHROOT_ARM64}"
+	if [ "$1" = "32" ]; then
+		CHROOT_PATH="${CHROOT_X32}"
+	elif [ "$1" = "64" ]; then
+		CHROOT_PATH="${CHROOT_X64}"
+	else
+	    CHROOT_PATH="${CHROOT_ARM64}"
+	fi
 
 	echo "Unmount chroot directories. Just in case."
 	umount -Rl "${CHROOT_PATH}"
@@ -44,6 +59,13 @@ prepare_chroot () {
 	echo "Chrooting into ${CHROOT_PATH}"
 	chroot "${CHROOT_PATH}" /usr/bin/env LANG=en_US.UTF-8 TERM=xterm PATH="/bin:/sbin:/usr/bin:/usr/sbin" /opt/prepare_chroot.sh
 
+	mkdir -p /opt/mingw
+    if [ -f "${CHROOT_PATH}/opt/mingw/build.log" ]; then
+        echo "Copying MinGW log from chroot to host /opt/mingw/build.log..."
+        cp "${CHROOT_PATH}/opt/mingw/build.log" "/opt/mingw/build_${arch_name}.log"
+        cp "${CHROOT_PATH}/opt/mingw/build.log" "/opt/mingw/build.log"
+    fi
+
 	echo "Unmount chroot directories"
 	umount -l "${CHROOT_PATH}"
 	umount "${CHROOT_PATH}"/proc
@@ -54,26 +76,28 @@ prepare_chroot () {
 }
 
 create_build_scripts () {
-    sdl2_version="2.32.10"
-    faudio_version="23.03"
-    vulkan_headers_version="1.4.352"
-    vulkan_loader_version="1.4.352"
-    spirv_headers_version="sdk-1.3.239.0"
-    libpcap_version="1.10.4"
-    libxkbcommon_version="1.13.1"
+	sdl2_version="2.32.10"
+	faudio_version="23.03"
+	vulkan_headers_version="1.4.352"
+	vulkan_loader_version="1.4.352"
+	spirv_headers_version="sdk-1.3.239.0"
+ 	libpcap_version="1.10.4"
+  	libxkbcommon_version="1.13.1"
+   	python3_version="3.12.4"
     meson_version="1.3.2"
     cmake_version="3.30.3"
+    ccache_version="4.13.6"
     libglvnd_version="1.7.0"
-    bison_version="3.8.2"
-    wayland_version="1.24.0"
-    wayland_protocols_version="1.47"
-    gnutls_version="3.8.12"
-    nettle_version="3.10.2"
-    p11_kit_version="0.26.2"
-    libgpg_error_version="1.59"
-    libgcrypt_version="1.12.2"
+	bison_version="3.8.2"
+	wayland_version="1.24.0"
+	wayland_protocols_version="1.47"
+	gnutls_version="3.8.12"
+	nettle_version="3.10.2"
+	p11_kit_version="0.26.2"
+	libgpg_error_version="1.59"
+	libgcrypt_version="1.12.2"
 
-    cat <<EOF > "${MAINDIR}/prepare_chroot.sh"
+	cat <<EOF > "${MAINDIR}"/prepare_chroot.sh
 #!/bin/bash
 
 apt-get update
@@ -144,7 +168,7 @@ wget -O /usr/include/linux/userfaultfd.h https://raw.githubusercontent.com/zen-k
 if [ -d /usr/lib/i386-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable_4.0.3~bionic_i386.deb; fi
 if [ -d /usr/lib/x86_64-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-amd64/wine-stable_4.0.3~bionic_amd64.deb; fi
 git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git -b 1.22
-# wget https://raw.githubusercontent.com/Lolmc0587/Wine-Builds/refs/heads/master/mingw-w64-build
+wget https://raw.githubusercontent.com/Lolmc0587/Wine-Builds/refs/heads/master/mingw-w64-build
 tar xf sdl.tar.gz
 tar xf faudio.tar.gz
 tar xf vulkan-loader.tar.gz
@@ -166,14 +190,10 @@ tar xf libgpg-error.tar.bz2
 tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-mkdir -p /opt/mingw
-wget -q --show-progress -O llvm-mingw.tar.xz https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-aarch64.tar.xz
-tar xf llvm-mingw.tar.xz -C "/opt/mingw" --strip-components=1
-rm llvm-mingw.tar.xz
-# bash mingw-w64-build aarch64 --linked-runtime ucrt
-# bash mingw-w64-build arm64ec
-# bash mingw-w64-build x86_64
-# bash mingw-w64-build i686
+bash mingw-w64-build aarch64 --linked-runtime ucrt
+bash mingw-w64-build arm64ec
+bash mingw-w64-build x86_64
+bash mingw-w64-build i686
 export CC=gcc-12
 export CXX=g++-12
 export CFLAGS="-O2"
@@ -246,17 +266,28 @@ make -j$(nproc) install
 cd /opt && rm -r /opt/build_libs
 EOF
 
-    chmod +x "${MAINDIR}/prepare_chroot.sh"
-    cp "${MAINDIR}/prepare_chroot.sh" "${CHROOT_ARM64}/opt"
+	chmod +x "${MAINDIR}"/prepare_chroot.sh
+	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_ARM64}"/opt
+	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
+	mv "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
 }
 
 mkdir -p "${MAINDIR}"
 
 debootstrap --arch arm64 $CHROOT_DISTRO "${CHROOT_ARM64}" $CHROOT_MIRROR
-create_build_scripts
-prepare_chroot
+# debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
+#debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 
-rm "${CHROOT_ARM64}/opt/prepare_chroot.sh"
+create_build_scripts
+
+prepare_chroot aarch64
+# prepare_chroot 32
+# prepare_chroot 64
+
+
+rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
+rm "${CHROOT_X64}"/opt/prepare_chroot.sh
+rm "${CHROOT_X32}"/opt/prepare_chroot.sh
 
 clear
 echo "Done"
