@@ -47,6 +47,7 @@ wget -O "${PREFIX}/include/linux/ntsync.h" https://raw.githubusercontent.com/zen
 wget -O "${PREFIX}/include/linux/userfaultfd.h" https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.15/main/include/uapi/linux/userfaultfd.h
 
 # CMake
+export PATH="$HOME/.local/bin:$PATH"
 pip3 install meson ninja
 
 # SDL2
