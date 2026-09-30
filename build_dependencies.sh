@@ -19,7 +19,7 @@ sudo apt-get -y install software-properties-common build-essential pkg-config ni
     libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev \
     libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev \
     libcapi20-dev libjpeg-dev samba-dev libffi-dev libpcsclite-dev libcups2-dev \
-    python3-pip libxcb-xkb-dev libbz2-dev graphviz xmlto
+    python3-pip libxcb-xkb-dev libbz2-dev graphviz xmlto libunwind-dev
 
 sudo apt-get -y build-dep wine libsdl2
 
