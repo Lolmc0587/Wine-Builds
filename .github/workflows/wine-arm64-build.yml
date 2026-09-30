@@ -1,4 +1,4 @@
-name: Wine Git arm64 CI
+name: Wine Git CI Arm64
 
 on:
   schedule:
@@ -7,36 +7,35 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-arm
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Download bootstraps artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: bootstraps.yml
+          workflow_conclusion: success
+          path: /opt
+
+      - name: Prepare Environment and Build Wine
         run: |
-          # Kích hoạt kiến trúc i386 để cài đặt các thư viện 32-bit (cho tiến trình WoW64)
-          sudo dpkg --add-architecture i386
           sudo apt-get update
+          sudo apt-get install -y perl git wget xz-utils autoconf flex bison pkg-config ninja-build
 
-          # Cài đặt trực tiếp các công cụ build Wine lên host
-          sudo apt-get install -y perl git wget xz-utils autoconf flex bison \
-            build-essential gcc-mingw-w64 pkg-config \
-            libx11-dev libfreetype-dev libx11-dev:i386 libfreetype-dev:i386
+          # Extract custom dependencies to /opt/wine-deps
+          sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
 
-      # --- LƯU Ý CHUỖI CÔNG CỤ (TOOLCHAIN) ---
-      # Nếu bạn sử dụng bộ Clang MinGW / FEX tự build từ cấu hình trước,
-      # bạn cần thêm step tải artifact toolchain đó tại đây và giải nén vào /opt/mingw
-      # để build_wine.sh có thể tìm thấy compiler.
-
-      - name: Build Wine
-        run: |
           chmod +x build_wine.sh
           export WINE_VERSION="git"
+
           WINE_BRANCH=vanilla ./build_wine.sh
-          # WINE_BRANCH=staging ./build_wine.sh
+          WINE_BRANCH=staging ./build_wine.sh
           sha256sum *.tar.xz
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: Wine-Git
           path: ./*.tar.xz

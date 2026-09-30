@@ -191,79 +191,79 @@ tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
 bash mingw-w64-build aarch64 --linked-runtime ucrt
-# bash mingw-w64-build arm64ec
-# bash mingw-w64-build x86_64
-# bash mingw-w64-build i686
-# export CC=gcc-12
-# export CXX=g++-12
-# export CFLAGS="-O2"
-# export CXXFLAGS="-O2"
-# cd cmake-${cmake_version}
-# ./bootstrap --parallel=$(nproc)
-# make -j$(nproc) install
-# cd ../ && mkdir build && cd build
-# cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
-# cd ../ && rm -r build && mkdir build && cd build
-# cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
-# cd ../ && rm -r build && mkdir build && cd build
-# cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
-# cd ../ && rm -r build && mkdir build && cd build
-# cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
-# cd ../ && rm -r build && mkdir build && cd build
-# cmake ../Vulkan-Loader-${vulkan_loader_version}
-# make -j$(nproc)
-# make install
-# cd ../ && rm -r build && mkdir build && cd build
-# cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
-# cd ../ && dpkg -x wine.deb .
-# cp opt/wine-stable/bin/widl /usr/bin
-# rm -r build && mkdir build && cd build
-# ../libpcap-${libpcap_version}/configure && make -j$(nproc) install
-# cd ../ && rm -r build && mkdir build && cd build
-# ../Python-${python3_version}/configure --enable-optimizations
-# make -j$(nproc)
-# make -j$(nproc) install
-# pip3 install setuptools
-# cd ../gstreamer
-# meson setup build
-# ninja -C build
-# ninja -C build install
-# cd ../bison-${bison_version}
-# ./configure
-# make -j$(nproc) install
-# cd ../wayland-${wayland_version}
-# meson setup build
-# meson compile -C build
-# meson install -C build
-# cd ../wayland-protocols-${wayland_protocols_version}
-# meson setup build
-# meson compile -C build
-# meson install -C build
-# cd ../libxkbcommon-xkbcommon-${libxkbcommon_version}
-# meson setup build -Denable-docs=false
-# meson compile -C build
-# meson install -C build
-# cd ../libglvnd-v${libglvnd_version}
-# meson setup build
-# meson compile -C build
-# meson install -C build
-# cd ../nettle-${nettle_version}
-# ./configure
-# make -j$(nproc) install
-# cd ../p11-kit-${p11_kit_version}
-# meson setup build
-# meson compile -C build
-# meson install -C build
-# cd ../gnutls-${gnutls_version}
-# ./configure --with-included-unistring --disable-doc
-# make -j$(nproc) install
-# cd ../libgpg-error-${libgpg_error_version}
-# ./configure
-# make -j$(nproc) install
-# cd ../libgcrypt-${libgcrypt_version}
-# ./configure
-# make -j$(nproc) install
-# cd /opt && rm -r /opt/build_libs
+bash mingw-w64-build arm64ec
+bash mingw-w64-build x86_64
+bash mingw-w64-build i686
+export CC=gcc-12
+export CXX=g++-12
+export CFLAGS="-O2"
+export CXXFLAGS="-O2"
+cd cmake-${cmake_version}
+./bootstrap --parallel=$(nproc)
+make -j$(nproc) install
+cd ../ && mkdir build && cd build
+cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../Vulkan-Loader-${vulkan_loader_version}
+make -j$(nproc)
+make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
+cd ../ && dpkg -x wine.deb .
+cp opt/wine-stable/bin/widl /usr/bin
+rm -r build && mkdir build && cd build
+../libpcap-${libpcap_version}/configure && make -j$(nproc) install
+cd ../ && rm -r build && mkdir build && cd build
+../Python-${python3_version}/configure --enable-optimizations
+make -j$(nproc)
+make -j$(nproc) install
+pip3 install setuptools
+cd ../gstreamer
+meson setup build
+ninja -C build
+ninja -C build install
+cd ../bison-${bison_version}
+./configure
+make -j$(nproc) install
+cd ../wayland-${wayland_version}
+meson setup build
+meson compile -C build
+meson install -C build
+cd ../wayland-protocols-${wayland_protocols_version}
+meson setup build
+meson compile -C build
+meson install -C build
+cd ../libxkbcommon-xkbcommon-${libxkbcommon_version}
+meson setup build -Denable-docs=false
+meson compile -C build
+meson install -C build
+cd ../libglvnd-v${libglvnd_version}
+meson setup build
+meson compile -C build
+meson install -C build
+cd ../nettle-${nettle_version}
+./configure
+make -j$(nproc) install
+cd ../p11-kit-${p11_kit_version}
+meson setup build
+meson compile -C build
+meson install -C build
+cd ../gnutls-${gnutls_version}
+./configure --with-included-unistring --disable-doc
+make -j$(nproc) install
+cd ../libgpg-error-${libgpg_error_version}
+./configure
+make -j$(nproc) install
+cd ../libgcrypt-${libgcrypt_version}
+./configure
+make -j$(nproc) install
+cd /opt && rm -r /opt/build_libs
 EOF
 
 	chmod +x "${MAINDIR}"/prepare_chroot.sh

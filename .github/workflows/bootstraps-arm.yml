@@ -12,25 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create bootstraps
+      - name: Build Native Dependencies
         run: |
-          sudo apt update
-          # Thêm qemu-user-static và binfmt-support để debootstrap có thể tạo chroot x86/x64 trên host ARM64
-          sudo apt install -y debootstrap perl qemu-user-static binfmt-support
-          chmod +x create_ubuntu_bootstraps.sh
-          sudo ./create_ubuntu_bootstraps.sh
-          cd /opt
-          sudo tar -I "xz -T0 -9" -cpf bootstraps.tar.xz chroots
-          sha256sum bootstraps.tar.xz
+          chmod +x build_dependencies.sh
+          ./build_dependencies.sh
 
-      - name: Upload debootstrap logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: comprehensive-failure-logs
-          path: |
-            /opt/chroots/*/debootstrap/debootstrap.log
-          if-no-files-found: ignore
+          # Compress the installed prefix
+          cd /opt
+          sudo tar -I "xz -T0 -9" -cpf bootstraps.tar.xz wine-deps
+          sha256sum bootstraps.tar.xz
 
       - name: Upload Bootstraps artifact
         uses: actions/upload-artifact@v4
