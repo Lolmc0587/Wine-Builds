@@ -124,7 +124,7 @@ cd ..
 # p11-kit
 wget -c https://github.com/p11-glue/p11-kit/releases/download/${p11_kit_version}/p11-kit-${p11_kit_version}.tar.xz -O - | tar -xJ
 cd p11-kit-${p11_kit_version}
-meson setup build --prefix="${PREFIX}" && meson install -C build
+meson setup build --prefix="${PREFIX}"  -Dsystemd=disabled && meson install -C build
 cd ..
 
 # GnuTLS
