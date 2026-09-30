@@ -31,7 +31,7 @@ export BUILD_FEX="true"
 
 export WINE_BUILD_OPTIONS="--without-oss --disable-winemenubuilder --disable-tests"
 export BUILD_DIR="${HOME}/build_wine"
-export BOOTSTRAP_ARM64="/opt/chroots/jammyarm64_chroot"
+export BOOTSTRAP_ARM64="/opt/chroots/bionicarm64_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 

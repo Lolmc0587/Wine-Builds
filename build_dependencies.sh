@@ -14,6 +14,7 @@ if ! command -v debootstrap 1>/dev/null || ! command -v perl 1>/dev/null; then
     exit 1
 fi
 
+# Upgraded to Jammy (22.04) because the llvm-mingw toolchain requires GLIBC_2.35
 export CHROOT_DISTRO="bionic"
 export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
 
