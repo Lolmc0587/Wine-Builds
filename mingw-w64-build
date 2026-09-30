@@ -473,6 +473,11 @@ for i in mpc isl mpfr gmp; do
     ln -s "$SRC_PATH/gcc/$i" "$SRC_PATH/binutils/$i"
 done
 
+export AR="gcc-ar"
+export RANLIB="gcc-ranlib"
+export NM="gcc-nm"
+export AR_FLAGS="cr"
+
 export CFLAGS="-O2"
 export CXXFLAGS="-O2"
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
