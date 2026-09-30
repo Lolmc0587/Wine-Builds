@@ -21,7 +21,7 @@ sudo apt-get -y install software-properties-common build-essential pkg-config ni
     libcapi20-dev libjpeg-dev samba-dev libffi-dev libpcsclite-dev libcups2-dev \
     python3-pip libxcb-xkb-dev libbz2-dev graphviz xmlto
 
-sudo apt-get -y build-dep wine-development libsdl2 libvulkan1
+sudo apt-get -y build-dep wine libsdl2
 
 # Versions
 sdl2_version="2.32.10"
