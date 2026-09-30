@@ -16,7 +16,7 @@ fi
 
 # Upgraded to Jammy (22.04) because the llvm-mingw toolchain requires GLIBC_2.35
 export CHROOT_DISTRO="bionic"
-export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
+export CHROOT_MIRROR="https://ftp.uni-stuttgart.de/ubuntu/"
 
 export MAINDIR=/opt/chroots
 export CHROOT_ARM64="${MAINDIR}/${CHROOT_DISTRO}_arm64_chroot"
@@ -75,131 +75,174 @@ create_build_scripts () {
 
     cat <<EOF > "${MAINDIR}/prepare_chroot.sh"
 #!/bin/bash
-set -e
 
 apt-get update
-apt-get -y install nano locales software-properties-common
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+apt-get -y install nano
+apt-get -y install locales
+echo ru_RU.UTF_8 UTF-8 >> /etc/locale.gen
+echo en_US.UTF_8 UTF-8 >> /etc/locale.gen
 locale-gen
-
-# Setup deb-src repositories
-sed -i 's/^deb /deb-src /g' /etc/apt/sources.list > /tmp/sources-src.list
-cat /tmp/sources-src.list >> /etc/apt/sources.list
-
+echo deb '${CHROOT_MIRROR}' ${CHROOT_DISTRO} main universe > /etc/apt/sources.list
+echo deb '${CHROOT_MIRROR}' ${CHROOT_DISTRO}-updates main universe >> /etc/apt/sources.list
+echo deb '${CHROOT_MIRROR}' ${CHROOT_DISTRO}-security main universe >> /etc/apt/sources.list
+echo deb-src '${CHROOT_MIRROR}' ${CHROOT_DISTRO} main universe >> /etc/apt/sources.list
+echo deb-src '${CHROOT_MIRROR}' ${CHROOT_DISTRO}-updates main universe >> /etc/apt/sources.list
+echo deb-src '${CHROOT_MIRROR}' ${CHROOT_DISTRO}-security main universe >> /etc/apt/sources.list
 apt-get update
 apt-get -y upgrade
 apt-get -y dist-upgrade
-
+apt-get -y install software-properties-common
+add-apt-repository -y ppa:ubuntu-toolchain-r/test
+add-apt-repository -y ppa:cybermax-dexter/mingw-w64-backport
+apt-get update
 apt-get -y build-dep wine-development libsdl2 libvulkan1 python3
-apt-get -y install wget git ninja-build pkg-config curl texinfo xmlto graphviz python3-pip
-apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev libjpeg-dev samba-dev libffi-dev libpcsclite-dev libcups2-dev libxcb-xkb-dev libbz2-dev
-
+apt-get -y install ccache gcc-12 g++-12 gcc-15 g++-15 wget git gcc-mingw-w64 g++-mingw-w64 ninja-build
+apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev
+apt-get -y install libjpeg62-dev samba-dev libffi-dev
+apt-get -y install libpcsclite-dev libcups2-dev
+apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl
+apt-get -y install graphviz xmlto --no-install-recommends
 apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev libpcap0.8 --purge --autoremove
 apt-get -y purge *gstreamer* --purge --autoremove
 apt-get -y clean
 apt-get -y autoclean
-
-export PATH="/usr/local/bin:/opt/mingw/bin:\${PATH}"
-
-mkdir -p /opt/build_libs
+export PATH="/usr/local/bin:\${PATH}"
+mkdir /opt/build_libs
 cd /opt/build_libs
-
 wget -O sdl.tar.gz https://www.libsdl.org/release/SDL2-${sdl2_version}.tar.gz
 wget -O faudio.tar.gz https://github.com/FNA-XNA/FAudio/archive/${faudio_version}.tar.gz
+sleep 5
 wget -O vulkan-loader.tar.gz https://github.com/KhronosGroup/Vulkan-Loader/archive/v${vulkan_loader_version}.tar.gz
+sleep 5
 wget -O vulkan-headers.tar.gz https://github.com/KhronosGroup/Vulkan-Headers/archive/v${vulkan_headers_version}.tar.gz
+sleep 5
 wget -O spirv-headers.tar.gz https://github.com/KhronosGroup/SPIRV-Headers/archive/${spirv_headers_version}.tar.gz
 wget -O libpcap.tar.gz https://www.tcpdump.org/release/libpcap-${libpcap_version}.tar.gz
+sleep 5
 wget -O libxkbcommon.tar.gz https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-${libxkbcommon_version}.tar.gz
+wget -O python3.tar.gz https://www.python.org/ftp/python/${python3_version}/Python-${python3_version}.tgz
+sleep 5
+wget -O meson.tar.gz https://github.com/mesonbuild/meson/releases/download/${meson_version}/meson-${meson_version}.tar.gz
+sleep 5
 wget -O cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}.tar.gz
+sleep 5
+wget -O ccache.tar.gz https://github.com/ccache/ccache/releases/download/v${ccache_version}/ccache-${ccache_version}.tar.gz
 wget -O libglvnd.tar.gz https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v${libglvnd_version}/libglvnd-v${libglvnd_version}.tar.gz
 wget -O bison.tar.xz https://ftp.gnu.org/gnu/bison/bison-${bison_version}.tar.xz
 wget -O wayland.tar.xz https://gitlab.freedesktop.org/wayland/wayland/-/releases/${wayland_version}/downloads/wayland-${wayland_version}.tar.xz
 wget -O wayland-protocols.tar.xz https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${wayland_protocols_version}/downloads/wayland-protocols-${wayland_protocols_version}.tar.xz
 wget -O gnutls.tar.xz https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-${gnutls_version}.tar.xz
 wget -O nettle.tar.gz https://ftp.gnu.org/gnu/nettle/nettle-${nettle_version}.tar.gz
+sleep 5
 wget -O p11-kit.tar.xz https://github.com/p11-glue/p11-kit/releases/download/${p11_kit_version}/p11-kit-${p11_kit_version}.tar.xz
 wget -O libgpg-error.tar.bz2 https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${libgpg_error_version}.tar.bz2
 wget -O libgcrypt.tar.bz2 https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-${libgcrypt_version}.tar.bz2
-
-mkdir -p /usr/include/linux
+sleep 5
 wget -O /usr/include/linux/ntsync.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.15/main/include/uapi/linux/ntsync.h
+sleep 5
 wget -O /usr/include/linux/userfaultfd.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.15/main/include/uapi/linux/userfaultfd.h
-
+if [ -d /usr/lib/i386-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable_4.0.3~bionic_i386.deb; fi
+if [ -d /usr/lib/x86_64-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-amd64/wine-stable_4.0.3~bionic_amd64.deb; fi
 git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git -b 1.22
-
+# wget https://raw.githubusercontent.com/Lolmc0587/Wine-Builds/refs/heads/master/mingw-w64-build
+tar xf sdl.tar.gz
+tar xf faudio.tar.gz
+tar xf vulkan-loader.tar.gz
+tar xf vulkan-headers.tar.gz
+tar xf spirv-headers.tar.gz
+tar xf libpcap.tar.gz
+tar xf libxkbcommon.tar.gz
+tar xf python3.tar.gz
+tar xf cmake.tar.gz
+tar xf ccache.tar.gz
+tar xf libglvnd.tar.gz
+tar xf bison.tar.xz
+tar xf wayland.tar.xz
+tar xf wayland-protocols.tar.xz
+tar xf gnutls.tar.xz
+tar xf nettle.tar.gz
+tar xf p11-kit.tar.xz
+tar xf libgpg-error.tar.bz2
+tar xf libgcrypt.tar.bz2
+tar xf meson.tar.gz -C /usr/local
+ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
 mkdir -p /opt/mingw
 wget -q --show-progress -O llvm-mingw.tar.xz https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-aarch64.tar.xz
 tar xf llvm-mingw.tar.xz -C "/opt/mingw" --strip-components=1
 rm llvm-mingw.tar.xz
-
-# Extract archives
-for f in *.tar.*; do tar xf "\$f"; done
-
-# Install pip dependencies
-pip3 install meson ninja setuptools
-
-export CC=clang
-export CXX=clang++
+# bash mingw-w64-build aarch64 --linked-runtime ucrt
+# bash mingw-w64-build arm64ec
+# bash mingw-w64-build x86_64
+# bash mingw-w64-build i686
+export CC=gcc-12
+export CXX=g++-12
 export CFLAGS="-O2"
 export CXXFLAGS="-O2"
-
 cd cmake-${cmake_version}
-./bootstrap --parallel=\$(nproc)
-make -j\$(nproc) install
-
-cd ../SDL2-${sdl2_version} && mkdir build && cd build
-cmake .. && make -j\$(nproc) && make install
-
-cd ../../FAudio-${faudio_version} && mkdir build && cd build
-cmake .. && make -j\$(nproc) && make install
-
-cd ../../Vulkan-Headers-${vulkan_headers_version} && mkdir build && cd build
-cmake .. && make -j\$(nproc) && make install
-
-cd ../../Vulkan-Loader-${vulkan_loader_version} && mkdir build && cd build
-cmake .. && make -j\$(nproc) && make install
-
-cd ../../SPIRV-Headers-${spirv_headers_version} && mkdir build && cd build
-cmake .. && make -j\$(nproc) && make install
-
-cd ../../libpcap-${libpcap_version}
-./configure && make -j\$(nproc) install
-
+./bootstrap --parallel=$(nproc)
+make -j$(nproc) install
+cd ../ && mkdir build && cd build
+cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../Vulkan-Loader-${vulkan_loader_version}
+make -j$(nproc)
+make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
+cd ../ && dpkg -x wine.deb .
+cp opt/wine-stable/bin/widl /usr/bin
+rm -r build && mkdir build && cd build
+../libpcap-${libpcap_version}/configure && make -j$(nproc) install
+cd ../ && rm -r build && mkdir build && cd build
+../Python-${python3_version}/configure --enable-optimizations
+make -j$(nproc)
+make -j$(nproc) install
+pip3 install setuptools
 cd ../gstreamer
 meson setup build
+ninja -C build
 ninja -C build install
-
 cd ../bison-${bison_version}
-./configure && make -j\$(nproc) install
-
+./configure
+make -j$(nproc) install
 cd ../wayland-${wayland_version}
-meson setup build && meson install -C build
-
+meson setup build
+meson compile -C build
+meson install -C build
 cd ../wayland-protocols-${wayland_protocols_version}
-meson setup build && meson install -C build
-
+meson setup build
+meson compile -C build
+meson install -C build
 cd ../libxkbcommon-xkbcommon-${libxkbcommon_version}
-meson setup build -Denable-docs=false && meson install -C build
-
+meson setup build -Denable-docs=false
+meson compile -C build
+meson install -C build
 cd ../libglvnd-v${libglvnd_version}
-meson setup build && meson install -C build
-
+meson setup build
+meson compile -C build
+meson install -C build
 cd ../nettle-${nettle_version}
-./configure && make -j\$(nproc) install
-
+./configure
+make -j$(nproc) install
 cd ../p11-kit-${p11_kit_version}
-meson setup build && meson install -C build
-
+meson setup build
+meson compile -C build
+meson install -C build
 cd ../gnutls-${gnutls_version}
-./configure --with-included-unistring --disable-doc && make -j\$(nproc) install
-
+./configure --with-included-unistring --disable-doc
+make -j$(nproc) install
 cd ../libgpg-error-${libgpg_error_version}
-./configure && make -j\$(nproc) install
-
+./configure
+make -j$(nproc) install
 cd ../libgcrypt-${libgcrypt_version}
-./configure && make -j\$(nproc) install
-
+./configure
+make -j$(nproc) install
 cd /opt && rm -r /opt/build_libs
 EOF
 
