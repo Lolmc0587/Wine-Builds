@@ -190,7 +190,7 @@ tar xf libgpg-error.tar.bz2
 tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-bash mingw-w64-build aarch64
+bash mingw-w64-build aarch64 --linked-runtime ucrt
 # bash mingw-w64-build arm64ec
 # bash mingw-w64-build x86_64
 #bash mingw-w64-build i686

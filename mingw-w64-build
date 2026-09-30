@@ -18,7 +18,7 @@
 
 ROOT_PATH="/opt/mingw"
 
-MINGW_W64_BRANCH="master"
+MINGW_W64_BRANCH="57b595039040eaa15bece85b7cc71d952281b269"
 BINUTILS_BRANCH="binutils-2_43-branch"
 GCC_BRANCH="releases/gcc-15"
 
@@ -128,8 +128,7 @@ download_sources()
     change_dir "$SRC_PATH"
 
     execute "downloading MinGW-w64 source" "" \
-        git clone --depth 1 -b "$MINGW_W64_BRANCH" \
-            https://git.code.sf.net/p/mingw-w64/mingw-w64 mingw-w64
+            bash -c "mkdir mingw-w64 && cd mingw-w64 && git init && git fetch --depth 1 https://git.code.sf.net/p/mingw-w64/mingw-w64 \"$MINGW_W64_BRANCH\" && git checkout FETCH_HEAD"
 
     execute "downloading Binutils source" "" \
         git clone --depth 1 -b "$BINUTILS_BRANCH" \
@@ -473,12 +472,8 @@ for i in mpc isl mpfr gmp; do
     ln -s "$SRC_PATH/gcc/$i" "$SRC_PATH/binutils/$i"
 done
 
-export AR="gcc-ar"
-export RANLIB="gcc-ranlib"
-export NM="gcc-nm"
-export AR_FLAGS="cr"
-
 export CFLAGS="-O2"
+
 export CXXFLAGS="-O2"
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
