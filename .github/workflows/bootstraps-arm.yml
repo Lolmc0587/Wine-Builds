@@ -15,7 +15,7 @@ jobs:
       - name: Build Native Dependencies
         run: |
           chmod +x build_dependencies.sh
-          ./build_dependencies.sh
+          sudo ./build_dependencies.sh
 
           # Compress the installed prefix
           cd /opt
