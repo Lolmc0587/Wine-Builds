@@ -222,8 +222,8 @@ ${BWRAP64} make -j$(nproc)
 # Build tools for ARM64EC (WoW64/i386 architecture support)
 export CROSSCC="${CROSSCC_X32}"
 export CROSSCXX="${CROSSCXX_X32}"
-export CFLAGS="${CFLAGS_X32}"
-export CXXFLAGS="${CFLAGS_X32}"
+export CFLAGS="${CFLAGS_AARCH64}"
+export CXXFLAGS="${CFLAGS_AARCH64}"
 export CROSSCFLAGS="${CFLAGS_X32}"
 export CROSSCXXFLAGS="${CFLAGS_X32}"
 
@@ -265,7 +265,7 @@ if [ "$BUILD_FEX" = "true" ]; then
     # Build FEX for WOW64 (x86 execution on ARM64)
     mkdir -p "${BUILD_DIR}/fex/build-wow64"
     cd "${BUILD_DIR}/fex/build-wow64" || exit 1
-    ${BWRAP64} env -u CC -u CXX cmake -G Ninja \
+    ${BWRAP64} env CC=clang CXX=clang++ cmake -G Ninja \ \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/aarch64-windows" \
         -DMINGW_TRIPLE=aarch64-w64-mingw32 \
@@ -279,7 +279,7 @@ if [ "$BUILD_FEX" = "true" ]; then
     # Build FEX for ARM64EC (x86_64 execution on ARM64)
     mkdir -p "${BUILD_DIR}/fex/build-arm64ec"
     cd "${BUILD_DIR}/fex/build-arm64ec" || exit 1
-    ${BWRAP64} env -u CC -u CXX cmake -G Ninja \
+    ${BWRAP64} env CC=clang CXX=clang++ cmake -G Ninja \ \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/arm64ec-windows" \
         -DMINGW_TRIPLE=arm64ec-w64-mingw32 \
