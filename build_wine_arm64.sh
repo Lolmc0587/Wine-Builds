@@ -31,7 +31,7 @@ export BUILD_FEX="true"
 
 export WINE_BUILD_OPTIONS="--without-oss --disable-winemenubuilder --disable-tests"
 export BUILD_DIR="${HOME}/build_wine"
-export BOOTSTRAP_ARM64="/opt/chroots/bionicarm64_chroot"
+export BOOTSTRAP_ARM64="/opt/chroots/jammy_arm64_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
@@ -57,7 +57,6 @@ build_with_bwrap () {
     bwrap --ro-bind "${BOOTSTRAP_PATH}" / --dev /dev --ro-bind /sys /sys \
           --proc /proc --tmpfs /tmp --tmpfs /home --tmpfs /run --tmpfs /var \
           --tmpfs /mnt --tmpfs /media --bind "${BUILD_DIR}" "${BUILD_DIR}" \
-          --ro-bind /opt/mingw /opt/mingw \
           --setenv PATH "/opt/mingw/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin" \
           "$@"
 }
@@ -184,9 +183,9 @@ if [ "$BUILD_FEX" = "true" ]; then
         git clone --recurse-submodules https://github.com/FEX-Emu/FEX.git fex
     fi
 fi
-
-patch -d wine*/ -Np1 < 0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch
-patch -d wine*/ -Np1 < 0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch
+cd "${BUILD_DIR}" || exit 1
+patch -d wine*/ -Np1 < "${scriptdir}/0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch"
+patch -d wine*/ -Np1 < "${scriptdir}/0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch"
 
 cd wine || exit 1
 dlls/winevulkan/make_vulkan

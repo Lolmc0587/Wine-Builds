@@ -8,11 +8,6 @@
 ## About 5.5 GB of free space is required
 ## And additional 2.5 GB is required for Wine compilation
 
-if [ "$EUID" != 0 ]; then
-	echo "This script requires root rights!"
-	exit 1
-fi
-
 if ! command -v debootstrap 1>/dev/null || ! command -v perl 1>/dev/null; then
 	echo "Please install debootstrap and perl and run the script again"
 	exit 1
@@ -20,16 +15,16 @@ fi
 
 # Keep in mind that although you can choose any version of Ubuntu/Debian
 # here, but this script has only been tested with Ubuntu 18.04 Bionic
-export CHROOT_DISTRO="bionic"
+export CHROOT_DISTRO="jammy"
 export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
 
 # Set your preferred path for storing chroots
 # Also don't forget to change the path to the chroots in the build_wine.sh
 # script, if you are going to use it
 export MAINDIR=/opt/chroots
-export CHROOT_ARM64="${MAINDIR}"/${CHROOT_DISTRO}arm64_chroot
-export CHROOT_X64="${MAINDIR}"/${CHROOT_DISTRO}64_chroot
-export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}32_chroot
+export CHROOT_ARM64="${MAINDIR}"/${CHROOT_DISTRO}_arm64_chroot
+export CHROOT_X64="${MAINDIR}"/${CHROOT_DISTRO}_64_chroot
+export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}_32_chroot
 
 prepare_chroot () {
 	if [ "$1" = "32" ]; then
@@ -99,7 +94,6 @@ create_build_scripts () {
 
 	cat <<EOF > "${MAINDIR}"/prepare_chroot.sh
 #!/bin/bash
-
 apt-get update
 apt-get -y install nano
 apt-get -y install locales
@@ -124,15 +118,18 @@ apt-get -y install ccache gcc-12 g++-12 gcc-15 g++-15 wget git gcc-mingw-w64 g++
 apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev
 apt-get -y install libjpeg62-dev samba-dev libffi-dev
 apt-get -y install libpcsclite-dev libcups2-dev
-apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl
+apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl libssl-dev
 apt-get -y install graphviz xmlto --no-install-recommends
 apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev libpcap0.8 --purge --autoremove
 apt-get -y purge *gstreamer* --purge --autoremove
 apt-get -y clean
 apt-get -y autoclean
+
+export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/local/bin:\${PATH}"
 mkdir /opt/build_libs
 cd /opt/build_libs
+
 wget -O sdl.tar.gz https://www.libsdl.org/release/SDL2-${sdl2_version}.tar.gz
 wget -O faudio.tar.gz https://github.com/FNA-XNA/FAudio/archive/${faudio_version}.tar.gz
 sleep 5
@@ -168,7 +165,7 @@ wget -O /usr/include/linux/userfaultfd.h https://raw.githubusercontent.com/zen-k
 if [ -d /usr/lib/i386-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable_4.0.3~bionic_i386.deb; fi
 if [ -d /usr/lib/x86_64-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-amd64/wine-stable_4.0.3~bionic_amd64.deb; fi
 git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git -b 1.22
-wget https://raw.githubusercontent.com/Lolmc0587/Wine-Builds/refs/heads/master/mingw-w64-build
+wget https://raw.githubusercontent.com/Kron4ek/Wine-Builds/refs/heads/master/mingw-w64-build
 tar xf sdl.tar.gz
 tar xf faudio.tar.gz
 tar xf vulkan-loader.tar.gz
@@ -190,8 +187,6 @@ tar xf libgpg-error.tar.bz2
 tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-bash mingw-w64-build aarch64 --linked-runtime ucrt
-bash mingw-w64-build arm64ec
 bash mingw-w64-build x86_64
 bash mingw-w64-build i686
 export CC=gcc-12
@@ -215,7 +210,7 @@ make -j$(nproc)
 make install
 cd ../ && rm -r build && mkdir build && cd build
 cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
-cd ../ && dpkg -x wine.deb .
+# cd ../ && dpkg -x wine.deb .
 cp opt/wine-stable/bin/widl /usr/bin
 rm -r build && mkdir build && cd build
 ../libpcap-${libpcap_version}/configure && make -j$(nproc) install
@@ -263,7 +258,17 @@ make -j$(nproc) install
 cd ../libgcrypt-${libgcrypt_version}
 ./configure
 make -j$(nproc) install
+
+echo "Downloading and extracting llvm-mingw toolchain..."
+sudo mkdir -p /opt/mingw
+wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-aarch64.tar.xz"
+sudo tar xf llvm-mingw.tar.xz -C /opt/mingw --strip-components=1
+rm llvm-mingw.tar.xz
+fi
 cd /opt && rm -r /opt/build_libs
+
+echo "Dependencies built successfully at ${PREFIX}!"
+
 EOF
 
 	chmod +x "${MAINDIR}"/prepare_chroot.sh
@@ -272,16 +277,29 @@ EOF
 	mv "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
 }
 
+# # Enable deb-src for build-dep
+# sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
+# sudo apt-get update
+#
+# # Install system dependencies
+# sudo apt-get -y install software-properties-common build-essential pkg-config ninja-build \
+#     wget git curl texinfo bison flex \
+#     libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev \
+#     libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev \
+#     libcapi20-dev libjpeg-dev samba-dev libffi-dev libpcsclite-dev libcups2-dev \
+#     python3-pip libxcb-xkb-dev libbz2-dev graphviz xmlto libunwind-dev
+#
+# sudo apt-get -y build-dep wine-development libsdl2
 mkdir -p "${MAINDIR}"
 
 debootstrap --arch arm64 $CHROOT_DISTRO "${CHROOT_ARM64}" $CHROOT_MIRROR
 # debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
-#debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
+debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 
 create_build_scripts
 
 prepare_chroot aarch64
-# prepare_chroot 32
+prepare_chroot 32
 # prepare_chroot 64
 
 

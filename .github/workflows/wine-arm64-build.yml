@@ -15,23 +15,22 @@ jobs:
       - name: Download bootstraps artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: bootstraps.yml
+          workflow: bootstraps-arm.yml
           workflow_conclusion: success
           path: /opt
 
       - name: Prepare Environment and Build Wine
         run: |
-          sudo apt-get update
-          sudo apt-get install -y perl git wget xz-utils autoconf flex bison pkg-config ninja-build
-
-          # Extract custom dependencies to /opt/wine-deps
+          sudo apt update
+          sudo apt install debootstrap perl git wget xz-utils bubblewrap autoconf
           sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
+          chmod +x build_wine_arm64.sh
+          export WINE_VERSION="$(wget -q -O - "https://raw.githubusercontent.com/Kron4ek/wine-tkg/master/VERSION" | tail -c +14)"
+          echo "WINE_VERSION=${WINE_VERSION}" >> "$GITHUB_ENV"
+          # export EXPERIMENTAL_WOW64="true"
 
-          chmod +x build_wine.sh
-          export WINE_VERSION="git"
-
-          WINE_BRANCH=vanilla ./build_wine.sh
-          WINE_BRANCH=staging ./build_wine.sh
+          WINE_BRANCH=vanilla ./build_wine_arm64.sh
+          # WINE_BRANCH=staging ./build_wine.sh
           sha256sum *.tar.xz
 
       - name: Upload Artifacts

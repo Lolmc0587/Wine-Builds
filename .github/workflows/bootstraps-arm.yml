@@ -14,12 +14,14 @@ jobs:
 
       - name: Build Native Dependencies
         run: |
-          chmod +x build_dependencies.sh
-          ./build_dependencies.sh
+          sudo apt update
+          sudo apt install debootstrap perl
+          chmod +x create_ubuntu_bootstraps.sh
+          sudo ./create_ubuntu_bootstraps.sh
 
           # Compress the installed prefix
           cd /opt
-          sudo tar -I "xz -T0 -9" -cpf bootstraps.tar.xz wine-deps
+          sudo tar -I "xz -T0 -9" -cpf bootstraps.tar.xz chroots
           sha256sum bootstraps.tar.xz
 
       - name: Upload Bootstraps artifact
