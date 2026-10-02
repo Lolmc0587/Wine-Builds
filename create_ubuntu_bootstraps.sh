@@ -201,6 +201,14 @@ cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
 cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
+cd ../wayland-${wayland_version}
+meson setup build
+meson compile -C build
+meson install -C build
+cd ../wayland-protocols-${wayland_protocols_version}
+meson setup build
+meson compile -C build
+meson install -C build
 cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
 cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
@@ -222,14 +230,6 @@ pip3 install setuptools
 cd ../bison-${bison_version}
 ./configure
 make -j$(nproc) install
-cd ../wayland-${wayland_version}
-meson setup build
-meson compile -C build
-meson install -C build
-cd ../wayland-protocols-${wayland_protocols_version}
-meson setup build
-meson compile -C build
-meson install -C build
 cd ../libxkbcommon-xkbcommon-${libxkbcommon_version}
 meson setup build -Denable-docs=false
 meson compile -C build
