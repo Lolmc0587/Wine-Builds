@@ -333,11 +333,11 @@ for build in ${builds_list}; do
 		unset DISPLAY
 		
 		# 3. Initialize the prefix headlessly (creates the registry and folders)
-		wine64 wineboot -u
+		wine wineboot -u
 		
 		# 4. Execute a built-in Windows binary (cmd.exe)
 		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
-		wine64 cmd.exe /c echo "Successfully executed Windows CMD via FEX on GitHub Actions!"
+		wine cmd.exe /c echo "Successfully executed Windows CMD via FEX on GitHub Actions!"
 		
 		if [ $? -eq 0 ]; then
 		    echo "FEX-Emu integration test passed!"
