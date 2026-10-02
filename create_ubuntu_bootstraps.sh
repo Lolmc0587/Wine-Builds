@@ -222,10 +222,6 @@ pip3 install setuptools
 cd ../bison-${bison_version}
 ./configure
 make -j$(nproc) install
-cd ../gstreamer
-meson setup build
-ninja -C build
-ninja -C build install
 cd ../wayland-${wayland_version}
 meson setup build
 meson compile -C build
@@ -245,6 +241,10 @@ meson install -C build
 cd ../nettle-${nettle_version}
 ./configure
 make -j$(nproc) install
+cd ../gstreamer
+meson setup build
+ninja -C build
+ninja -C build install
 cd ../p11-kit-${p11_kit_version}
 meson setup build
 meson compile -C build
