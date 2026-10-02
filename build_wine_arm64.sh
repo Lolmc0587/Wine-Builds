@@ -216,10 +216,10 @@ mkdir -p "${BUILD_DIR}/wine-build"
 cd "${BUILD_DIR}/wine-build" || exit
 
 # Configure Wine to build ALL architectures for New WoW64
-${BWRAP64} env PKG_CONFIG_PATH="/usr/local/lib/aarch64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
-    "${BUILD_DIR}/wine/configure" \
+# PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
-    --enable-archs=aarch64,i386,x86_64,arm64ec \
+    --enable-archs=aarch64,x86_64,i386,arm64ec \
     ${WINE_BUILD_OPTIONS}
 
 # Build and install everything
