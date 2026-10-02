@@ -299,7 +299,7 @@ debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 create_build_scripts
 
 prepare_chroot aarch64
-prepare_chroot 32
+# prepare_chroot 32
 # prepare_chroot 64
 
 
