@@ -261,7 +261,7 @@ make -j$(nproc) install
 
 echo "Downloading and extracting llvm-mingw toolchain..."
 sudo mkdir -p /opt/mingw
-wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-aarch64.tar.xz"
+wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/bylaws/llvm-mingw/releases/download/20250920/llvm-mingw-20250920-ucrt-ubuntu-22.04-aarch64.tar.xz"
 sudo tar xf llvm-mingw.tar.xz -C /opt/mingw --strip-components=1
 rm llvm-mingw.tar.xz
 fi

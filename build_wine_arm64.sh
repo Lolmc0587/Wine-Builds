@@ -331,6 +331,12 @@ for build in ${builds_list}; do
 		# Inject ARM64EC MinGW runtimes
 		cp "${BOOTSTRAP_ARM64}/opt/mingw/arm64ec-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/"
 
+        # Inject i386 (x86 WoW64) MinGW runtimes
+        cp "${BOOTSTRAP_ARM64}/opt/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/i386-windows/"
+
+        # Inject ARMv7 (ARM32) MinGW runtimes
+        cp "${BOOTSTRAP_ARM64}/opt/mingw/armv7-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/armv7-windows/"
+
         echo "Testing Wine + FEX execution in headless mode..."
 
 		# 1. Point to the newly built binaries
