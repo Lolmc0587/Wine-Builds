@@ -322,7 +322,16 @@ for build in ${builds_list}; do
 		if [ -f wine/wine-tkg-config.txt ]; then
 			cp wine/wine-tkg-config.txt "${build}"
 		fi
-  echo "Testing Wine + FEX execution in headless mode..."
+
+		echo "Injecting MinGW runtime DLLs into Wine prefix..."
+
+		# Inject AArch64 MinGW runtimes
+		cp "${BOOTSTRAP_ARM64}/opt/mingw/aarch64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/"
+
+		# Inject ARM64EC MinGW runtimes
+		cp "${BOOTSTRAP_ARM64}/opt/mingw/arm64ec-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/"
+
+        echo "Testing Wine + FEX execution in headless mode..."
 
 		# 1. Point to the newly built binaries
 		export PATH="${BUILD_DIR}/wine-${BUILD_NAME}-arm64/bin:$PATH"
