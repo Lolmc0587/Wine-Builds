@@ -322,6 +322,29 @@ for build in ${builds_list}; do
 		if [ -f wine/wine-tkg-config.txt ]; then
 			cp wine/wine-tkg-config.txt "${build}"
 		fi
+  echo "Testing Wine + FEX execution in headless mode..."
+
+		# 1. Point to the newly built binaries
+		export PATH="${BUILD_DIR}/wine-${BUILD_NAME}-arm64/bin:$PATH"
+		export WINEPREFIX="${BUILD_DIR}/test-prefix"
+		
+		# 2. Disable debug spam and ensure no display is expected
+		export WINEDEBUG=-all
+		unset DISPLAY
+		
+		# 3. Initialize the prefix headlessly (creates the registry and folders)
+		wine64 wineboot -u
+		
+		# 4. Execute a built-in Windows binary (cmd.exe)
+		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
+		wine64 cmd.exe /c echo "Successfully executed Windows CMD via FEX on GitHub Actions!"
+		
+		if [ $? -eq 0 ]; then
+		    echo "FEX-Emu integration test passed!"
+		else
+		    echo "FEX-Emu integration test FAILED!"
+		    exit 1
+		fi
 
 		tar -Jcf "${build}.tar.xz" "${build}"
 		mv "${build}.tar.xz" "${result_dir}"
