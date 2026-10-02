@@ -265,32 +265,36 @@ if [ "$BUILD_FEX" = "true" ]; then
     # Build FEX for WOW64 (x86 execution on ARM64)
     mkdir -p "${BUILD_DIR}/fex/build-wow64"
     cd "${BUILD_DIR}/fex/build-wow64" || exit 1
-    ${BWRAP64} env CC=clang CXX=clang++ cmake -G Ninja \ \
+    ${BWRAP64} env -u CC -u CXX cmake -G Ninja \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/aarch64-windows" \
+        -DCMAKE_TOOLCHAIN_FILE="../Data/CMake/toolchain_mingw.cmake" \
         -DMINGW_TRIPLE=aarch64-w64-mingw32 \
-        -DBUILD_FEXCONFIG=False \
         -DENABLE_LTO=False \
         -DBUILD_TESTING=False \
+        -DBUILD_FEXCONFIG=False \
         -DENABLE_JEMALLOC_GLIBC_ALLOC=False \
         -DTUNE_CPU=none ..
     ${BWRAP64} ninja
     ${BWRAP64} ninja install
 
+
     # Build FEX for ARM64EC (x86_64 execution on ARM64)
     mkdir -p "${BUILD_DIR}/fex/build-arm64ec"
     cd "${BUILD_DIR}/fex/build-arm64ec" || exit 1
-    ${BWRAP64} env CC=clang CXX=clang++ cmake -G Ninja \ \
+    ${BWRAP64} env -u CC -u CXX cmake -G Ninja \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/arm64ec-windows" \
+        -DCMAKE_TOOLCHAIN_FILE="../Data/CMake/toolchain_mingw.cmake" \
         -DMINGW_TRIPLE=arm64ec-w64-mingw32 \
-        -DBUILD_FEXCONFIG=False \
         -DENABLE_LTO=False \
         -DBUILD_TESTING=False \
+        -DBUILD_FEXCONFIG=False \
         -DENABLE_JEMALLOC_GLIBC_ALLOC=False \
         -DTUNE_CPU=none ..
     ${BWRAP64} ninja
     ${BWRAP64} ninja install
+
 
     cd "${BUILD_DIR}" || exit 1
 fi
