@@ -218,7 +218,7 @@ cd "${BUILD_DIR}/wine-build" || exit
 # Configure Wine to build ALL architectures for New WoW64
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
-    --enable-archs=aarch64,i386 \
+    --enable-archs=aarch64,x86_64,i386,arm64ec \
     ${WINE_BUILD_OPTIONS}
 
 # Build and install everything
@@ -300,6 +300,9 @@ for build in ${builds_list}; do
 
         # Inject i386 (x86 WoW64) MinGW runtimes
         cp "${BOOTSTRAP_ARM64}/opt/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/i386-windows/"
+
+        # Inject x86_64 MinGW runtimes
+        cp "${BOOTSTRAP_ARM64}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/x86_64-windows/"
 
         # Inject ARMv7 (ARM32) MinGW runtimes
         cp "${BOOTSTRAP_ARM64}/opt/mingw/armv7-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/armv7-windows/"
