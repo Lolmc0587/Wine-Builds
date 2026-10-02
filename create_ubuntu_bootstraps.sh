@@ -219,13 +219,13 @@ cd ../ && rm -r build && mkdir build && cd build
 make -j$(nproc)
 make -j$(nproc) install
 pip3 install setuptools
+cd ../bison-${bison_version}
+./configure
+make -j$(nproc) install
 cd ../gstreamer
 meson setup build
 ninja -C build
 ninja -C build install
-cd ../bison-${bison_version}
-./configure
-make -j$(nproc) install
 cd ../wayland-${wayland_version}
 meson setup build
 meson compile -C build
