@@ -219,7 +219,7 @@ cd "${BUILD_DIR}/build64" || exit
 ${BWRAP64} "${BUILD_DIR}/wine/configure" --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
 ${BWRAP64} make -j$(nproc)
 
-# Build tools for ARM64EC (WoW64/i386 architecture support)
+# Build WoW64/i386 (32-bit architecture support)
 export CROSSCC="${CROSSCC_X32}"
 export CROSSCXX="${CROSSCXX_X32}"
 export CFLAGS="${CFLAGS_AARCH64}"
@@ -227,22 +227,22 @@ export CXXFLAGS="${CFLAGS_AARCH64}"
 export CROSSCFLAGS="${CFLAGS_X32}"
 export CROSSCXXFLAGS="${CFLAGS_X32}"
 
-mkdir "${BUILD_DIR}/build32-tools"
-cd "${BUILD_DIR}/build32-tools" || exit
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP64} "${BUILD_DIR}/wine/configure" ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}/wine-${BUILD_NAME}-x86"
+mkdir "${BUILD_DIR}/build32"
+cd "${BUILD_DIR}/build32" || exit
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP64} "${BUILD_DIR}/wine/configure" --with-wine64="${BUILD_DIR}/build64" ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
 ${BWRAP64} make -j$(nproc) install
 
-# Build ARM64EC linked against the AArch64 tools
+# Build ARM64EC (x86_64 architecture support)
 export CROSSCC="${CROSSCC_ARM64EC}"
 export CROSSCXX="${CROSSCXX_ARM64EC}"
-export CFLAGS="${CFLAGS_ARM64EC}"
-export CXXFLAGS="${CFLAGS_ARM64EC}"
+export CFLAGS="${CFLAGS_AARCH64}"
+export CXXFLAGS="${CFLAGS_AARCH64}"
 export CROSSCFLAGS="${CFLAGS_ARM64EC}"
 export CROSSCXXFLAGS="${CFLAGS_ARM64EC}"
 
-mkdir "${BUILD_DIR}/build32"
-cd "${BUILD_DIR}/build32" || exit
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP64} "${BUILD_DIR}/wine/configure" --with-wine64="${BUILD_DIR}/build64" --with-wine-tools="${BUILD_DIR}/build32-tools" ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
+mkdir "${BUILD_DIR}/build-arm64ec"
+cd "${BUILD_DIR}/build-arm64ec" || exit
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP64} "${BUILD_DIR}/wine/configure" --with-wine64="${BUILD_DIR}/build64" ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
 ${BWRAP64} make -j$(nproc) install
 
 # Install the main 64-bit build
@@ -265,7 +265,7 @@ if [ "$BUILD_FEX" = "true" ]; then
     # Build FEX for WOW64 (x86 execution on ARM64)
     mkdir -p "${BUILD_DIR}/fex/build-wow64"
     cd "${BUILD_DIR}/fex/build-wow64" || exit 1
-    ${BWRAP64} env -u CC -u CXX cmake -G Ninja \
+    ${BWRAP64} env -u CC -u CXX LDFLAGS="-static" cmake -G Ninja \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/aarch64-windows" \
         -DCMAKE_TOOLCHAIN_FILE="../Data/CMake/toolchain_mingw.cmake" \
@@ -282,7 +282,7 @@ if [ "$BUILD_FEX" = "true" ]; then
     # Build FEX for ARM64EC (x86_64 execution on ARM64)
     mkdir -p "${BUILD_DIR}/fex/build-arm64ec"
     cd "${BUILD_DIR}/fex/build-arm64ec" || exit 1
-    ${BWRAP64} env -u CC -u CXX cmake -G Ninja \
+    ${BWRAP64} env -u CC -u CXX LDFLAGS="-static" cmake -G Ninja \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/arm64ec-windows" \
         -DCMAKE_TOOLCHAIN_FILE="../Data/CMake/toolchain_mingw.cmake" \
@@ -327,18 +327,18 @@ for build in ${builds_list}; do
 		# 1. Point to the newly built binaries
 		export PATH="${BUILD_DIR}/wine-${BUILD_NAME}-arm64/bin:$PATH"
 		export WINEPREFIX="${BUILD_DIR}/test-prefix"
-		
+
 		# 2. Disable debug spam and ensure no display is expected
 		export WINEDEBUG=-all
 		unset DISPLAY
-		
+
 		# 3. Initialize the prefix headlessly (creates the registry and folders)
 		wine wineboot -u
-		
+
 		# 4. Execute a built-in Windows binary (cmd.exe)
 		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
 		wine cmd.exe /c echo "Successfully executed Windows CMD via FEX on GitHub Actions!"
-		
+
 		if [ $? -eq 0 ]; then
 		    echo "FEX-Emu integration test passed!"
 		else
