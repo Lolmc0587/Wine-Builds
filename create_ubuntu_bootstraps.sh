@@ -173,43 +173,67 @@ tar xf libgpg-error.tar.bz2
 tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-bash mingw-w64-build x86_64
-bash mingw-w64-build i686
+# bash mingw-w64-build x86_64
+# bash mingw-w64-build i686
 export CC=gcc-12
 export CXX=g++-12
 export CFLAGS="-O2"
 export CXXFLAGS="-O2"
+
+echo "Installing cmake..."
 cd cmake-${cmake_version}
 ./bootstrap --parallel=$(nproc)
 make -j$(nproc) install
+
+echo "Installing ccache..."
 cd ../ && mkdir build && cd build
 cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
+
+echo "Installing wayland..."
 cd ../wayland-${wayland_version}
-meson setup build
+meson setup build -Ddocumentation=false
 meson compile -C build
 meson install -C build
+
+echo "Installing wayland-protocols..."
 cd ../wayland-protocols-${wayland_protocols_version}
 meson setup build
 meson compile -C build
 meson install -C build
 cd ../ && rm -r build && mkdir build && cd build
+
+echo "Installing SDL2..."
 cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
+
+echo "Installing FAudio..."
 cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
+
+echo "Installing Vulkan Headers..."
 cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
+
+echo "Installing Vulkan Loader..."
 cmake ../Vulkan-Loader-${vulkan_loader_version}
 make -j$(nproc)
 make install
+
+echo "Installing SPIRV Headers..."
 cd ../ && rm -r build && mkdir build && cd build
 cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
 # cd ../ && dpkg -x wine.deb .
 cp opt/wine-stable/bin/widl /usr/bin
 rm -r build && mkdir build && cd build
+
+echo "Installing libpcap..."
 ../libpcap-${libpcap_version}/configure && make -j$(nproc) install
 cd ../ && rm -r build && mkdir build && cd build
+
+echo "Installing Python..."
 ../Python-${python3_version}/configure --enable-optimizations
+
+echo "Installing bison..."
 make -j$(nproc)
 make -j$(nproc) install
 pip3 install setuptools
@@ -226,8 +250,10 @@ meson compile -C build
 meson install -C build
 cd ../nettle-${nettle_version}
 ./configure
+echo "Installing nettle..."
 make -j$(nproc) install
 cd ../gstreamer
+echo "Installing gstreamer..."
 meson setup build
 ninja -C build
 ninja -C build install
