@@ -207,88 +207,24 @@ fi
 # --- Start Building ---
 
 # Clear strict cross-compiler overrides so Wine can auto-detect all of them
-# unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
+unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 
-# # Make sure the llvm-mingw bin directory is in your PATH
-# export PATH="${BOOTSTRAP_ARM64}/opt/mingw/bin:$PATH"
+# Make sure the llvm-mingw bin directory is in your PATH
+export PATH="${BOOTSTRAP_ARM64}/opt/mingw/bin:$PATH"
 
-# mkdir -p "${BUILD_DIR}/wine-build"
-# cd "${BUILD_DIR}/wine-build" || exit
+mkdir -p "${BUILD_DIR}/wine-build"
+cd "${BUILD_DIR}/wine-build" || exit
 
-# # Configure Wine to build ALL architectures for New WoW64
-# # PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
-# ${BWRAP64} "${BUILD_DIR}/wine/configure" \
-#     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
-#     --enable-archs=aarch64,x86_64,i386,arm64ec \
-#     ${WINE_BUILD_OPTIONS}
+# Configure Wine to build ALL architectures for New WoW64
+# PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+${BWRAP64} "${BUILD_DIR}/wine/configure" \
+    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
+    --enable-archs=aarch64,i386,arm64ec \
+    ${WINE_BUILD_OPTIONS}
 
-# # Build and install everything
-# ${BWRAP64} make -j$(nproc) install
-# Sửa lại biến PKG_CONFIG_PATH để nhận diện đủ thư viện của Ubuntu chroot
-export WINE_PKG_CONFIG_PATH="/usr/local/lib/aarch64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
-
-# 1. Build AArch64 (Host tools and 64-bit Wine core)
-export CROSSCC="${CROSSCC_AARCH64}"
-export CROSSCXX="${CROSSCXX_AARCH64}"
-export CFLAGS="${CFLAGS_AARCH64}"
-export CXXFLAGS="${CFLAGS_AARCH64}"
-export CROSSCFLAGS="${CFLAGS_AARCH64}"
-export CROSSCXXFLAGS="${CFLAGS_AARCH64}"
-
-mkdir -p "${BUILD_DIR}/build64"
-cd "${BUILD_DIR}/build64" || exit
-PKG_CONFIG_PATH="${WINE_PKG_CONFIG_PATH}" ${BWRAP64} "${BUILD_DIR}/wine/configure" --enable-win64 ${WINE_BUILD_OPTIONS} --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
-${BWRAP64} make -j$(nproc)
-
-# 2. Build x86_64 (BẮT BUỘC để chạy app Windows 64-bit qua FEX)
-export CROSSCC="${CROSSCC_X64:-x86_64-w64-mingw32-clang}"
-export CROSSCXX="${CROSSCXX_X64:-x86_64-w64-mingw32-clang++}"
-export CFLAGS="${CFLAGS_AARCH64}"
-export CXXFLAGS="${CFLAGS_AARCH64}"
-export CROSSCFLAGS="${CFLAGS_X64:-${CFLAGS_AARCH64}}"
-export CROSSCXXFLAGS="${CFLAGS_X64:-${CFLAGS_AARCH64}}"
-
-mkdir -p "${BUILD_DIR}/build64_x86"
-cd "${BUILD_DIR}/build64_x86" || exit
-PKG_CONFIG_PATH="${WINE_PKG_CONFIG_PATH}" ${BWRAP64} "${BUILD_DIR}/wine/configure" --enable-win64 --with-wine64="${BUILD_DIR}/build64" ${WINE_BUILD_OPTIONS} --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
+# Build and install everything
 ${BWRAP64} make -j$(nproc) install
 
-# 3. Build WoW64/i386 (32-bit architecture support)
-export CROSSCC="${CROSSCC_X32}"
-export CROSSCXX="${CROSSCXX_X32}"
-export CFLAGS="${CFLAGS_AARCH64}"
-export CXXFLAGS="${CFLAGS_AARCH64}"
-export CROSSCFLAGS="${CFLAGS_X32}"
-export CROSSCXXFLAGS="${CFLAGS_X32}"
-
-mkdir -p "${BUILD_DIR}/build32"
-cd "${BUILD_DIR}/build32" || exit
-PKG_CONFIG_PATH="${WINE_PKG_CONFIG_PATH}" ${BWRAP64} "${BUILD_DIR}/wine/configure" --with-wine64="${BUILD_DIR}/build64" ${WINE_BUILD_OPTIONS} --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
-${BWRAP64} make -j$(nproc) install
-
-# 4. Build ARM64EC
-export CROSSCC="${CROSSCC_ARM64EC}"
-export CROSSCXX="${CROSSCXX_ARM64EC}"
-export CFLAGS="${CFLAGS_AARCH64}"
-export CXXFLAGS="${CFLAGS_AARCH64}"
-export CROSSCFLAGS="${CFLAGS_ARM64EC}"
-export CROSSCXXFLAGS="${CFLAGS_ARM64EC}"
-
-mkdir -p "${BUILD_DIR}/build-arm64ec"
-cd "${BUILD_DIR}/build-arm64ec" || exit
-PKG_CONFIG_PATH="${WINE_PKG_CONFIG_PATH}" ${BWRAP64} "${BUILD_DIR}/wine/configure" --with-wine64="${BUILD_DIR}/build64" ${WINE_BUILD_OPTIONS} --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64"
-${BWRAP64} make -j$(nproc) install
-
-# 5. Install the main 64-bit build
-export CROSSCC="${CROSSCC_AARCH64}"
-export CROSSCXX="${CROSSCXX_AARCH64}"
-export CFLAGS="${CFLAGS_AARCH64}"
-export CXXFLAGS="${CFLAGS_AARCH64}"
-export CROSSCFLAGS="${CFLAGS_AARCH64}"
-export CROSSCXXFLAGS="${CFLAGS_AARCH64}"
-
-cd "${BUILD_DIR}/build64" || exit
-${BWRAP64} make -j$(nproc) install
 # --- FEX-Emu ---
 if [ "$BUILD_FEX" = "true" ]; then
     echo
