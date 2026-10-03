@@ -290,7 +290,15 @@ for build in ${builds_list}; do
 		if [ -f wine/wine-tkg-config.txt ]; then
 			cp wine/wine-tkg-config.txt "${build}"
 		fi
+		echo "Stripping debug symbols to reduce size..."
 
+		${BWRAP64} find "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+		
+		${BWRAP64} find "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+		
+		${BWRAP64} find "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+		
+		echo "Stripping completed."
 		echo "Injecting MinGW runtime DLLs into Wine prefix..."
 
 		# Inject AArch64 MinGW runtimes
