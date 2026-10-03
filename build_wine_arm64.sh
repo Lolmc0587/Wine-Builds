@@ -305,8 +305,18 @@ for build in ${builds_list}; do
         # Inject x86_64 MinGW runtimes
         cp "${BOOTSTRAP_ARM64}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/x86_64-windows/"
 
-        # Inject ARMv7 (ARM32) MinGW runtimes
-        cp "${BOOTSTRAP_ARM64}/opt/mingw/armv7-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/armv7-windows/"
+       echo "Symlinking FEX-Emu engines to New WoW64 JIT targets..."
+
+		# Link 32-bit FEX engine
+		cp "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/libwow64fex.dll" \
+		   "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/xtajit.dll"
+		
+		# Link 64-bit FEX engine
+		cp "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/libarm64ecfex.dll" \
+		   "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/xtajit64.dll"
+		   
+		cp "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/libarm64ecfex.dll" \
+		   "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/xtajit64.dll"
 
         echo "Testing Wine + FEX execution in headless mode..."
 
