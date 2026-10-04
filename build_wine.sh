@@ -290,9 +290,10 @@ else
 	fi
 fi
 # patch all type of wine
-patch -d wine*/ -Np1 < 0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch
-patch -d wine*/ -Np1 < 0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch
-
+#patch -d wine*/ -Np1 < 0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch
+#patch -d wine*/ -Np1 < 0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch
+patch -d wine*/ -Np1 < "${scriptdir}/0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch"
+patch -d wine*/ -Np1 < "${scriptdir}/0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch"
 if [ ! -d wine ]; then
 	clear
 	echo "No Wine source code found!"
