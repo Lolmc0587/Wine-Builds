@@ -328,49 +328,84 @@ fi
 
 BWRAP64="build_with_bwrap 64"
 BWRAP32="build_with_bwrap 32"
+#
+# export CROSSCC="${CROSSCC_X64}"
+# export CROSSCXX="${CROSSCXX_X64}"
+# export CFLAGS="${CFLAGS_X64}"
+# export CXXFLAGS="${CFLAGS_X64}"
+# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+#
+# mkdir "${BUILD_DIR}"/build64
+# cd "${BUILD_DIR}"/build64 || exit
+# ${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+# ${BWRAP64} make -j$(nproc)
+#
+# export CROSSCC="${CROSSCC_X32}"
+# export CROSSCXX="${CROSSCXX_X32}"
+# export CFLAGS="${CFLAGS_X32}"
+# export CXXFLAGS="${CFLAGS_X32}"
+# export CROSSCFLAGS="${CROSSCFLAGS_X32}"
+# export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+#
+# mkdir "${BUILD_DIR}"/build32-tools
+# cd "${BUILD_DIR}"/build32-tools || exit
+# PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+# ${BWRAP32} make -j$(nproc) install
+#
+# export CFLAGS="${CFLAGS_X64}"
+# export CXXFLAGS="${CFLAGS_X64}"
+# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+#
+# mkdir "${BUILD_DIR}"/build32
+# cd "${BUILD_DIR}"/build32 || exit
+# PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
+# ${BWRAP32} make -j$(nproc) install
+#
+# export CROSSCC="${CROSSCC_X64}"
+# export CROSSCXX="${CROSSCXX_X64}"
+# export CFLAGS="${CFLAGS_X64}"
+# export CXXFLAGS="${CFLAGS_X64}"
+# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+#
+# cd "${BUILD_DIR}"/build64 || exit
+# ${BWRAP64} make -j$(nproc) install
 
-export CROSSCC="${CROSSCC_X64}"
-export CROSSCXX="${CROSSCXX_X64}"
-export CFLAGS="${CFLAGS_X64}"
-export CXXFLAGS="${CFLAGS_X64}"
-export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+# Clear strict cross-compiler overrides so Wine can auto-detect all of them
+unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 
-mkdir "${BUILD_DIR}"/build64
-cd "${BUILD_DIR}"/build64 || exit
-${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
-${BWRAP64} make -j$(nproc)
+# Make sure the llvm-mingw bin directory is in your PATH
+export PATH="${BOOTSTRAP_ARM64}/opt/mingw/bin:$PATH"
 
-export CROSSCC="${CROSSCC_X32}"
-export CROSSCXX="${CROSSCXX_X32}"
-export CFLAGS="${CFLAGS_X32}"
-export CXXFLAGS="${CFLAGS_X32}"
-export CROSSCFLAGS="${CROSSCFLAGS_X32}"
-export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+mkdir -p "${BUILD_DIR}/wine-build"
+cd "${BUILD_DIR}/wine-build" || exit
 
-mkdir "${BUILD_DIR}"/build32-tools
-cd "${BUILD_DIR}"/build32-tools || exit
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+# Configure Wine to build ALL architectures for New WoW64
+${BWRAP32} "${BUILD_DIR}/wine/configure" \
+    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
+    --enable-archs=i386 \
+    ${WINE_BUILD_OPTIONS}
+
+# Build and install everything
 ${BWRAP32} make -j$(nproc) install
 
-export CFLAGS="${CFLAGS_X64}"
-export CXXFLAGS="${CFLAGS_X64}"
-export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+${BWRAP64} "${BUILD_DIR}/wine/configure" \
+    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
+    --enable-archs=x86_64,i386 \
+    ${WINE_BUILD_OPTIONS}
 
-mkdir "${BUILD_DIR}"/build32
-cd "${BUILD_DIR}"/build32 || exit
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
-${BWRAP32} make -j$(nproc) install
+# Build and install everything
+${BWRAP64} make -j$(nproc) install
 
-export CROSSCC="${CROSSCC_X64}"
-export CROSSCXX="${CROSSCXX_X64}"
-export CFLAGS="${CFLAGS_X64}"
-export CXXFLAGS="${CFLAGS_X64}"
-export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+${BWRAP64} "${BUILD_DIR}/wine/configure" \
+    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64-wow64" \
+    --enable-archs=x86_64,i386 \
+    --enable-win64 \
+    ${WINE_BUILD_OPTIONS}
 
-cd "${BUILD_DIR}"/build64 || exit
+# Build and install everything
 ${BWRAP64} make -j$(nproc) install
 
 echo
@@ -388,13 +423,13 @@ fi
 
 export XZ_OPT="-9 -T 0"
 
-builds_list="wine-${BUILD_NAME}-x86 wine-${BUILD_NAME}-amd64"
+builds_list="wine-${BUILD_NAME}-x86 wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
 
-if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
-	cp -r wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64
-
-	builds_list="${builds_list} wine-${BUILD_NAME}-amd64-wow64"
-fi
+# if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
+# 	cp -r wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64
+#
+# 	builds_list="${builds_list} wine-${BUILD_NAME}-amd64-wow64"
+# fi
 
 for build in ${builds_list}; do
 	if [ -d "${build}" ]; then
