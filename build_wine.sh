@@ -86,8 +86,8 @@ export WINE_BUILD_OPTIONS="--without-oss --disable-winemenubuilder --disable-tes
 export BUILD_DIR="${HOME}"/build_wine
 
 # Change these paths to where your Ubuntu bootstraps reside
-export BOOTSTRAP_X64=/opt/chroots/bionic64_chroot
-export BOOTSTRAP_X32=/opt/chroots/bionic32_chroot
+export BOOTSTRAP_X64=/opt/chroots/jammy_64_chroot
+export BOOTSTRAP_X32=/opt/chroots/jammy_32_chroot
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
