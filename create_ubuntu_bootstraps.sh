@@ -13,11 +13,15 @@ if ! command -v debootstrap 1>/dev/null || ! command -v perl 1>/dev/null; then
 	exit 1
 fi
 
+export ARCH="$(uname -m)"
 # Keep in mind that although you can choose any version of Ubuntu/Debian
 # here, but this script has only been tested with Ubuntu 18.04 Bionic
 export CHROOT_DISTRO="jammy"
-export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
-
+if [ "$ARCH" = "aarch64" ]; then
+	export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
+else
+	export CHROOT_MIRROR="http://archive.ubuntu.com/ubuntu"
+fi
 # Set your preferred path for storing chroots
 # Also don't forget to change the path to the chroots in the build_wine.sh
 # script, if you are going to use it
@@ -53,13 +57,6 @@ prepare_chroot () {
 
 	echo "Chrooting into ${CHROOT_PATH}"
 	chroot "${CHROOT_PATH}" /usr/bin/env LANG=en_US.UTF-8 TERM=xterm PATH="/bin:/sbin:/usr/bin:/usr/sbin" /opt/prepare_chroot.sh
-
-	mkdir -p /opt/mingw
-    if [ -f "${CHROOT_PATH}/opt/mingw/build.log" ]; then
-        echo "Copying MinGW log from chroot to host /opt/mingw/build.log..."
-        cp "${CHROOT_PATH}/opt/mingw/build.log" "/opt/mingw/build_${arch_name}.log"
-        cp "${CHROOT_PATH}/opt/mingw/build.log" "/opt/mingw/build.log"
-    fi
 
 	echo "Unmount chroot directories"
 	umount -l "${CHROOT_PATH}"
@@ -273,51 +270,43 @@ make -j$(nproc) install
 
 echo "Downloading and extracting llvm-mingw toolchain..."
 sudo mkdir -p /opt/mingw
-wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/bylaws/llvm-mingw/releases/download/20250920/llvm-mingw-20250920-ucrt-ubuntu-22.04-aarch64.tar.xz"
+wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/bylaws/llvm-mingw/releases/download/20250920/llvm-mingw-20250920-ucrt-ubuntu-22.04-${ARCH}.tar.xz"
 sudo tar xf llvm-mingw.tar.xz -C /opt/mingw --strip-components=1
 rm llvm-mingw.tar.xz
-fi
+
 cd /opt && rm -r /opt/build_libs
-
 echo "Dependencies built successfully at ${PREFIX}!"
-
 EOF
 
 	chmod +x "${MAINDIR}"/prepare_chroot.sh
-	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_ARM64}"/opt
-	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
-	mv "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
+	if [ "$ARCH" = "aarch64" ]; then
+	    mkdir -p "${CHROOT_ARM64}"/opt
+		cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_ARM64}"/opt
+	fi
+	if [ "$ARCH" = "x86_64" ]; then
+	    mkdir -p "${CHROOT_X32}"/opt
+	    mkdir -p "${CHROOT_X64}"/opt
+    	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
+    	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
+	fi
 }
 
-# # Enable deb-src for build-dep
-# sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
-# sudo apt-get update
-#
-# # Install system dependencies
-# sudo apt-get -y install software-properties-common build-essential pkg-config ninja-build \
-#     wget git curl texinfo bison flex \
-#     libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev \
-#     libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev \
-#     libcapi20-dev libjpeg-dev samba-dev libffi-dev libpcsclite-dev libcups2-dev \
-#     python3-pip libxcb-xkb-dev libbz2-dev graphviz xmlto libunwind-dev
-#
-# sudo apt-get -y build-dep wine-development libsdl2
 mkdir -p "${MAINDIR}"
-
-debootstrap --arch arm64 $CHROOT_DISTRO "${CHROOT_ARM64}" $CHROOT_MIRROR
-# debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
-debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
-
 create_build_scripts
 
-prepare_chroot aarch64
-# prepare_chroot 32
-# prepare_chroot 64
-
-
-rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
-rm "${CHROOT_X64}"/opt/prepare_chroot.sh
-rm "${CHROOT_X32}"/opt/prepare_chroot.sh
+if [ "$ARCH" = "aarch64" ]; then
+	debootstrap --arch arm64 $CHROOT_DISTRO "${CHROOT_ARM64}" $CHROOT_MIRROR
+	prepare_chroot aarch64
+	rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
+fi
+if [ "$ARCH" = "x86_64" ]; then
+	debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
+	debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
+	prepare_chroot 32
+	prepare_chroot 64
+	rm "${CHROOT_X64}"/opt/prepare_chroot.sh
+	rm "${CHROOT_X32}"/opt/prepare_chroot.sh
+fi
 
 clear
 echo "Done"
