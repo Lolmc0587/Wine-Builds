@@ -139,12 +139,10 @@ build_with_bwrap () {
 	fi
 
     bwrap --ro-bind "${BOOTSTRAP_PATH}" / --dev /dev --ro-bind /sys /sys \
-		  --proc /proc --tmpfs /tmp --tmpfs /home --tmpfs /run --tmpfs /var \
-		  --tmpfs /mnt --tmpfs /media --bind "${BUILD_DIR}" "${BUILD_DIR}" \
-		  --bind-try "${XDG_CACHE_HOME}"/ccache "${XDG_CACHE_HOME}"/ccache \
-		  --bind-try "${HOME}"/.ccache "${HOME}"/.ccache \
-		  --setenv PATH "/opt/mingw/x86_64/bin:/opt/mingw/i686/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin" \
-			"$@"
+          --proc /proc --tmpfs /tmp --tmpfs /home --tmpfs /run --tmpfs /var \
+          --tmpfs /mnt --tmpfs /media --bind "${BUILD_DIR}" "${BUILD_DIR}" \
+          --setenv PATH "/opt/mingw/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin" \
+          "$@"
 }
 
 if ! command -v git 1>/dev/null; then
@@ -289,11 +287,10 @@ else
 		cd "${BUILD_DIR}" || exit 1
 	fi
 fi
-# patch all type of wine
-#patch -d wine*/ -Np1 < 0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch
-#patch -d wine*/ -Np1 < 0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch
+
 patch -d wine*/ -Np1 < "${scriptdir}/0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch"
 patch -d wine*/ -Np1 < "${scriptdir}/0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch"
+
 if [ ! -d wine ]; then
 	clear
 	echo "No Wine source code found!"
@@ -378,7 +375,7 @@ BWRAP32="build_with_bwrap 32"
 unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 
 # Make sure the llvm-mingw bin directory is in your PATH
-export PATH="${BOOTSTRAP_ARM64}/opt/mingw/bin:$PATH"
+export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
 
 mkdir -p "${BUILD_DIR}/wine-build"
 cd "${BUILD_DIR}/wine-build" || exit
@@ -392,6 +389,7 @@ ${BWRAP32} "${BUILD_DIR}/wine/configure" \
 # Build and install everything
 ${BWRAP32} make -j$(nproc) install
 
+export PATH="${BOOTSTRAP_X64}/opt/mingw/bin:$PATH"
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
     --enable-archs=x86_64,i386 \
@@ -437,6 +435,27 @@ for build in ${builds_list}; do
 		if [ -f wine/wine-tkg-config.txt ]; then
 			cp wine/wine-tkg-config.txt "${build}"
 		fi
+		echo "Stripping debug symbols to reduce size..."
+
+        if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ] || [ "${build}" = "wine-${BUILD_NAME}-amd64" ]; then
+    		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+            # Inject x86_64 MinGW runtimes
+            cp "${BOOTSTRAP_X32}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
+        fi
+        if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
+    		${BWRAP32} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    		${BWRAP32} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    		${BWRAP32} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+        fi
+
+        # Inject i386 (x86 WoW64) MinGW runtimes
+        cp "${BOOTSTRAP_X64}/opt/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
 
 		if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ]; then
   			if [ -f "${build}"/bin/wine64 ]; then

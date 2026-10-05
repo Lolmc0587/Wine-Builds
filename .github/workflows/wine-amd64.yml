@@ -32,3 +32,5 @@ jobs:
         with:
           name: Wine
           path: ./*.tar.xz
+          if-no-files-found: error
+          compression-level: 0

@@ -293,12 +293,12 @@ for build in ${builds_list}; do
 		fi
 		echo "Stripping debug symbols to reduce size..."
 
-		${BWRAP64} find "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
-		
-		${BWRAP64} find "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
-		
-		${BWRAP64} find "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
-		
+		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+
 		echo "Stripping completed."
 		echo "Injecting MinGW runtime DLLs into Wine prefix..."
 
@@ -319,11 +319,11 @@ for build in ${builds_list}; do
 		# Link 32-bit FEX engine
 		cp "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/libwow64fex.dll" \
 		   "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/xtajit.dll"
-		
+
 		# Link 64-bit FEX engine
 		cp "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/libarm64ecfex.dll" \
 		   "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/xtajit64.dll"
-		   
+
 		cp "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/libarm64ecfex.dll" \
 		   "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/xtajit64.dll"
 

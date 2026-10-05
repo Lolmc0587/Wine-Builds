@@ -38,3 +38,5 @@ jobs:
         with:
           name: Wine-Git
           path: ./*.tar.xz
+          if-no-files-found: error
+          compression-level: 0
