@@ -380,7 +380,7 @@ unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 # export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
 export PATH="${MAINDIR}/mingw/bin:$PATH"
 mkdir -p "${BUILD_DIR}/wine-build-32"
-cd "${BUILD_DIR}/wine-build" || exit
+cd "${BUILD_DIR}/wine-build-32" || exit
 
 # Configure Wine to build ALL architectures for New WoW64
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
@@ -392,7 +392,7 @@ ${BWRAP64} "${BUILD_DIR}/wine/configure" \
 ${BWRAP64} make -j$(nproc) install
 
 mkdir -p "${BUILD_DIR}/wine-build-64"
-cd "${BUILD_DIR}/wine-build" || exit
+cd "${BUILD_DIR}/wine-build-64" || exit
 
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
