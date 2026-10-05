@@ -305,16 +305,16 @@ for build in ${builds_list}; do
 		echo "Injecting MinGW runtime DLLs into Wine prefix..."
 
 		# Inject AArch64 MinGW runtimes
-		cp "${BOOTSTRAP_ARM64}/opt/mingw/aarch64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/"
+		cp "${MAINDIR}/mingw/aarch64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/"
 
 		# Inject ARM64EC MinGW runtimes
-		cp "${BOOTSTRAP_ARM64}/opt/mingw/arm64ec-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/"
+		cp "${MAINDIR}/mingw/arm64ec-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/"
 
         # Inject i386 (x86 WoW64) MinGW runtimes
-        cp "${BOOTSTRAP_ARM64}/opt/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/i386-windows/"
+        cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/i386-windows/"
 
         # Inject x86_64 MinGW runtimes
-        cp "${BOOTSTRAP_ARM64}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/x86_64-windows/"
+        cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/x86_64-windows/"
 
        echo "Symlinking FEX-Emu engines to New WoW64 JIT targets..."
 
