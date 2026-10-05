@@ -212,7 +212,7 @@ fi
 unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 
 # Make sure the llvm-mingw bin directory is in your PATH
-export PATH="${BOOTSTRAP_ARM64}/opt/mingw/bin:$PATH"
+export PATH="${MAINDIR}/mingw/bin:$PATH"
 
 mkdir -p "${BUILD_DIR}/wine-build"
 cd "${BUILD_DIR}/wine-build" || exit
