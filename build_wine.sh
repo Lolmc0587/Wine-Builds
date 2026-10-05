@@ -379,7 +379,7 @@ unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 # Make sure the llvm-mingw bin directory is in your PATH
 # export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
 export PATH="${MAINDIR}/mingw/bin:$PATH"
-mkdir -p "${BUILD_DIR}/wine-build"
+mkdir -p "${BUILD_DIR}/wine-build-32"
 cd "${BUILD_DIR}/wine-build" || exit
 
 # Configure Wine to build ALL architectures for New WoW64
@@ -391,6 +391,8 @@ ${BWRAP64} "${BUILD_DIR}/wine/configure" \
 # Build and install everything
 ${BWRAP64} make -j$(nproc) install
 
+mkdir -p "${BUILD_DIR}/wine-build-64"
+cd "${BUILD_DIR}/wine-build" || exit
 
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
@@ -400,6 +402,8 @@ ${BWRAP64} "${BUILD_DIR}/wine/configure" \
 # Build and install everything
 ${BWRAP64} make -j$(nproc) install
 
+mkdir -p "${BUILD_DIR}/wine-build-wow64"
+cd "${BUILD_DIR}/wine-build" || exit
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64-wow64" \
     --enable-archs=x86_64,i386 \
@@ -437,28 +441,28 @@ for build in ${builds_list}; do
 		if [ -f wine/wine-tkg-config.txt ]; then
 			cp wine/wine-tkg-config.txt "${build}"
 		fi
-		# echo "Stripping debug symbols to reduce size..."
+		echo "Stripping debug symbols to reduce size..."
 
-#         if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ] || [ "${build}" = "wine-${BUILD_NAME}-amd64" ]; then
-#     		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
-#
-#     		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
-#
-#     		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
-#             # Inject x86_64 MinGW runtimes
-#             # cp "${BOOTSTRAP_X32}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
-#             # cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
-#         fi
-#         if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
-#     		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
-#
-#     		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
-#
-#     		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
-#         fi
+         if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ] || [ "${build}" = "wine-${BUILD_NAME}-amd64" ]; then
+						     		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+						     		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+						     		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+             # Inject x86_64 MinGW runtimes
+             cp "${BOOTSTRAP_X32}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
+             cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
+         fi
+         if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
+						     		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+						     		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+						     		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+         fi
 
         # Inject i386 (x86 WoW64) MinGW runtimes
-        # cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
+        cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
 
 		if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ]; then
   			if [ -f "${build}"/bin/wine64 ]; then
