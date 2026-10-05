@@ -28,9 +28,22 @@ jobs:
           # WINE_BRANCH=staging ./build_wine.sh
           # WINE_BRANCH=staging-tkg ./build_wine.sh
           sha256sum *.tar.xz
-      - uses: actions/upload-artifact@v4
+      - name: Upload Wine AMD64 WoW64
+        uses: actions/upload-artifact@v4
         with:
-          name: Wine
-          path: ./*.tar.xz
-          if-no-files-found: error
+          name: wine-amd64-wow64
+          path: ./*-amd64-wow64.tar.xz
           compression-level: 0
+
+      - name: Upload Wine AMD64
+        uses: actions/upload-artifact@v4
+        with:
+          name: wine-amd64
+          path: ./*-amd64.tar.xz
+          compression-level: 0
+
+      - name: Upload SHA256SUMS
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHA256SUMS
+          path: SHA256SUMS
