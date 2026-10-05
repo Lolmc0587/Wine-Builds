@@ -403,7 +403,7 @@ ${BWRAP64} "${BUILD_DIR}/wine/configure" \
 ${BWRAP64} make -j$(nproc) install
 
 mkdir -p "${BUILD_DIR}/wine-build-wow64"
-cd "${BUILD_DIR}/wine-build" || exit
+cd "${BUILD_DIR}/wine-build-wow64" || exit
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64-wow64" \
     --enable-archs=x86_64,i386 \
