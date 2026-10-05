@@ -320,11 +320,11 @@ if ! command -v bwrap 1>/dev/null; then
 	exit 1
 fi
 
-if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
-	clear
-	echo "Bootstraps are required for compilation!"
-	exit 1
-fi
+# if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
+# 	clear
+# 	echo "Bootstraps are required for compilation!"
+# 	exit 1
+# fi
 
 BWRAP64="build_with_bwrap 64"
 BWRAP32="build_with_bwrap 32"
@@ -377,21 +377,21 @@ BWRAP32="build_with_bwrap 32"
 unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 
 # Make sure the llvm-mingw bin directory is in your PATH
-export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
-
+# export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
+export PATH="${BOOTSTRAP_X64}/opt/mingw/bin:$PATH"
 mkdir -p "${BUILD_DIR}/wine-build"
 cd "${BUILD_DIR}/wine-build" || exit
 
 # Configure Wine to build ALL architectures for New WoW64
-${BWRAP32} "${BUILD_DIR}/wine/configure" \
+${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
     --enable-archs=i386 \
     ${WINE_BUILD_OPTIONS}
 
 # Build and install everything
-${BWRAP32} make -j$(nproc) install
+${BWRAP64} make -j$(nproc) install
 
-export PATH="${BOOTSTRAP_X64}/opt/mingw/bin:$PATH"
+
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
     --enable-archs=x86_64,i386 \
@@ -446,7 +446,8 @@ for build in ${builds_list}; do
 
     		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
             # Inject x86_64 MinGW runtimes
-            cp "${BOOTSTRAP_X32}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
+            # cp "${BOOTSTRAP_X32}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
+            cp "${MAINDIR}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
         fi
         if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
     		${BWRAP32} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
@@ -457,7 +458,7 @@ for build in ${builds_list}; do
         fi
 
         # Inject i386 (x86 WoW64) MinGW runtimes
-        cp "${BOOTSTRAP_X64}/opt/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
+        cp "${MAINDIR}/opt/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
 
 		if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ]; then
   			if [ -f "${build}"/bin/wine64 ]; then

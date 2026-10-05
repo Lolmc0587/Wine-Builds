@@ -41,7 +41,12 @@ jobs:
           name: wine-amd64
           path: ./*-amd64.tar.xz
           compression-level: 0
-
+      - name: Upload Wine x86
+        uses: actions/upload-artifact@v4
+        with:
+          name: wine-x86
+          path: ./*-x86.tar.xz
+          compression-level: 0
       - name: Upload SHA256SUMS
         uses: actions/upload-artifact@v4
         with:
