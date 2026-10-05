@@ -269,12 +269,6 @@ cd ../libgcrypt-${libgcrypt_version}
 ./configure
 make -j$(nproc) install
 
-echo "Downloading and extracting llvm-mingw toolchain..."
-sudo mkdir -p /opt/mingw
-wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/bylaws/llvm-mingw/releases/download/20250920/llvm-mingw-20250920-ucrt-ubuntu-22.04-${ARCH}.tar.xz"
-sudo tar xf llvm-mingw.tar.xz -C /opt/mingw --strip-components=1
-rm llvm-mingw.tar.xz
-
 cd /opt && rm -r /opt/build_libs
 echo "Dependencies built successfully at ${PREFIX}!"
 EOF
@@ -301,7 +295,7 @@ if [ "$ARCH" = "aarch64" ]; then
 	rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
 fi
 if [ "$ARCH" = "x86_64" ]; then
-    # --variant=minbase for console-setup-linux errors
+    # --variant=minbase fix for console-setup-linux errors
     debootstrap --arch i386 --variant=minbase $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 	debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
 	echo "Preparing i386 chroots..."
@@ -311,6 +305,12 @@ if [ "$ARCH" = "x86_64" ]; then
 	rm "${CHROOT_X64}"/opt/prepare_chroot.sh
 	rm "${CHROOT_X32}"/opt/prepare_chroot.sh
 fi
+
+# Download and extract llvm-mingw toolchain
+mkdir -p "${MAINDIR}"/mingw
+wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/bylaws/llvm-mingw/releases/download/20250920/llvm-mingw-20250920-ucrt-ubuntu-22.04-${ARCH}.tar.xz"
+sudo tar xf llvm-mingw.tar.xz -C "${MAINDIR}"/mingw --strip-components=1
+rm llvm-mingw.tar.xz
 
 clear
 echo "Done"

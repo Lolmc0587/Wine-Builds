@@ -31,7 +31,8 @@ export BUILD_FEX="true"
 
 export WINE_BUILD_OPTIONS="--without-oss --disable-winemenubuilder --disable-tests"
 export BUILD_DIR="${HOME}/build_wine"
-export BOOTSTRAP_ARM64="/opt/chroots/jammy_arm64_chroot"
+export MAINDIR="/opt/chroots"
+export BOOTSTRAP_ARM64="${MAINDIR}/jammy_arm64_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
@@ -56,7 +57,8 @@ build_with_bwrap () {
 
     bwrap --ro-bind "${BOOTSTRAP_PATH}" / --dev /dev --ro-bind /sys /sys \
           --proc /proc --tmpfs /tmp --tmpfs /home --tmpfs /run --tmpfs /var \
-          --tmpfs /mnt --tmpfs /media --bind "${BUILD_DIR}" "${BUILD_DIR}" \
+          --tmpfs /mnt --tmpfs /media --tmpfs /opt --bind "${BUILD_DIR}" "${BUILD_DIR}" \
+          --bind "${MAINDIR}/mingw" /opt/mingw \
           --setenv PATH "/opt/mingw/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin" \
           "$@"
 }
