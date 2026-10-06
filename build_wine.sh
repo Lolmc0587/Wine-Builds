@@ -435,8 +435,8 @@ fi
 
 export XZ_OPT="-9 -T 0"
 
-# builds_list="wine-${BUILD_NAME}-x86 wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
-builds_list="wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
+builds_list="wine-${BUILD_NAME}-x86 wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
+# builds_list="wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
 
 # if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
 # 	cp -r wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64
