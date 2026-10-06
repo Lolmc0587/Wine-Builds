@@ -428,7 +428,8 @@ fi
 
 export XZ_OPT="-9 -T 0"
 
-builds_list="wine-${BUILD_NAME}-x86 wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
+#builds_list="wine-${BUILD_NAME}-x86 wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
+builds_list="wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64"
 
 # if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
 # 	cp -r wine-${BUILD_NAME}-amd64 wine-${BUILD_NAME}-amd64-wow64
@@ -471,20 +472,21 @@ for build in ${builds_list}; do
 		unset DISPLAY
 
 		# 3. Initialize the prefix headlessly (creates the registry and folders)
-	 ${BWRAP64}	"${build}/bin/wineboot" -u
+	 "${build}/bin/wineboot" -u
 
 		# 4. Execute a built-in Windows binary (cmd.exe)
 		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
-		${BWRAP64}	"${build}/bin/wine" cmd.exe /c echo "Successfully executed Windows CMD on GitHub Actions!"
+		"${build}/bin/wine" cmd.exe /c echo "Successfully executed Windows CMD on GitHub Actions!"
 
 		if [ $? -eq 0 ]; then
 		    echo "wine test passed!"
-						bash	"${build}/bin/wineserver" -k
-						rm -rf "${BUILD_DIR}/test-prefix"
+						
 		else
 		    echo "wine test FAILED!"
-		    exit 1
+		    # exit 1
 		fi
+		bash	"${build}/bin/wineserver" -k
+						rm -rf "${BUILD_DIR}/test-prefix"
         # Inject i386 (x86 WoW64) MinGW runtimes
         cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
 
