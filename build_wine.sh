@@ -479,7 +479,7 @@ for build in ${builds_list}; do
 
 		if [ $? -eq 0 ]; then
 		    echo "wine test passed!"
-						bash	"${build}/bin/wineserver -k"
+						bash	"${build}/bin/wineserver" -k
 						rm -rf "${BUILD_DIR}/test-prefix"
 		else
 		    echo "wine test FAILED!"
