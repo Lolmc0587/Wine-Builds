@@ -279,9 +279,9 @@ EOF
 		cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_ARM64}"/opt
 	fi
 	if [ "$ARCH" = "x86_64" ]; then
-	    # mkdir -p "${CHROOT_X32}"/opt
+	    mkdir -p "${CHROOT_X32}"/opt
 	    mkdir -p "${CHROOT_X64}"/opt
-    	# cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
+    	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
     	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
 	fi
 }
@@ -296,14 +296,14 @@ if [ "$ARCH" = "aarch64" ]; then
 fi
 if [ "$ARCH" = "x86_64" ]; then
     # --variant=minbase fix for console-setup-linux errors
-    # debootstrap --arch i386 --variant=minbase $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
+    debootstrap --arch i386 --variant=minbase $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 	debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
 	echo "Preparing i386 chroots..."
-	# prepare_chroot 32
+	prepare_chroot 32
 	echo "Preparing amd64 chroots..."
 	prepare_chroot 64
 	rm "${CHROOT_X64}"/opt/prepare_chroot.sh
-	# rm "${CHROOT_X32}"/opt/prepare_chroot.sh
+	rm "${CHROOT_X32}"/opt/prepare_chroot.sh
 fi
 
 # Download and extract llvm-mingw toolchain
