@@ -453,13 +453,13 @@ for build in ${builds_list}; do
              # cp "${BOOTSTRAP_X32}/opt/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
              cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
          fi
-         if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
+         #if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
 #      		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 #
 #      		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
 #
 #      		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
-         fi
+         #fi
 
         # Inject i386 (x86 WoW64) MinGW runtimes
         cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
