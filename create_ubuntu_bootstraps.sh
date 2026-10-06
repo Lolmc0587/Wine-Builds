@@ -111,7 +111,7 @@ add-apt-repository -y ppa:cybermax-dexter/mingw-w64-backport
 apt-get update
 apt-get -y build-dep wine-development libsdl2 libvulkan1 python3
 # ccache gcc-15 g++-15
-apt-get -y install wget git gcc-15 g++-15 gcc-12 g++-12 gcc-mingw-w64 g++-mingw-w64 ninja-build flex clang lld qtbase5-dev pkg-config libfreetype-dev
+apt-get -y install wget git gcc-12 g++-12 gcc-mingw-w64 g++-mingw-w64 ninja-build flex clang lld qtbase5-dev pkg-config libfreetype-dev
 apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev
 apt-get -y install libjpeg62-dev samba-dev libffi-dev
 apt-get -y install libpcsclite-dev libcups2-dev
@@ -295,10 +295,10 @@ if [ "$ARCH" = "aarch64" ]; then
 fi
 if [ "$ARCH" = "x86_64" ]; then
     # --variant=minbase fix for console-setup-linux errors
-    # debootstrap --arch i386 --variant=minbase $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
+    debootstrap --arch i386 --variant=minbase $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 	debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
-	# echo "Preparing i386 chroots..."
-	# prepare_chroot 32
+	echo "Preparing i386 chroots..."
+	prepare_chroot 32
 	echo "Preparing amd64 chroots..."
 	prepare_chroot 64
 	rm "${CHROOT_X64}"/opt/prepare_chroot.sh
