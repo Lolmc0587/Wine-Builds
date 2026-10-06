@@ -471,11 +471,11 @@ for build in ${builds_list}; do
 		unset DISPLAY
 
 		# 3. Initialize the prefix headlessly (creates the registry and folders)
-	 bash	"${build}/bin/wineboot" -u
+	 ${BWRAP64}	"${build}/bin/wineboot" -u
 
 		# 4. Execute a built-in Windows binary (cmd.exe)
 		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
-		bash	"${build}/bin/wine" cmd.exe /c echo "Successfully executed Windows CMD on GitHub Actions!"
+		${BWRAP64}	"${build}/bin/wine" cmd.exe /c echo "Successfully executed Windows CMD on GitHub Actions!"
 
 		if [ $? -eq 0 ]; then
 		    echo "wine test passed!"
