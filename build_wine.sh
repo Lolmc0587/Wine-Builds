@@ -92,13 +92,13 @@ export BOOTSTRAP_X32="${MAINDIR}/jammy_32_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-export CC="clang"
-export CXX="clang++"
+export CC="gcc"
+export CXX="g++"
 
-export CROSSCC_X32="i686-w64-mingw32-gcc"
-export CROSSCXX_X32="i686-w64-mingw32-g++"
-export CROSSCC_X64="x86_64-w64-mingw32-gcc"
-export CROSSCXX_X64="x86_64-w64-mingw32-g++"
+export CROSSCC_X32="/opt/mingw/bin/i686-w64-mingw32-gcc"
+export CROSSCXX_X32="/opt/mingw/bin/i686-w64-mingw32-g++"
+export CROSSCC_X64="/opt/mingw/bin/x86_64-w64-mingw32-gcc"
+export CROSSCXX_X64="/opt/mingw/bin/x86_64-w64-mingw32-g++"
 
 export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse -O3"
 export CFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse -O3"
@@ -106,7 +106,7 @@ export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
 export CROSSCFLAGS_X32="${CFLAGS_X32}"
 export CROSSCFLAGS_X64="${CFLAGS_X64}"
-export CROSSLDFLAGS="${LDFLAGS}"
+export CROSSLDFLAGS="-Wl,-O1"
 
 if [ "$USE_CCACHE" = "true" ]; then
 	export CC="ccache ${CC}"
@@ -494,8 +494,8 @@ for build in ${builds_list}; do
 		    echo "wine test FAILED!"
 		    exit 1
 		fi
-		bash	"${build}/bin/wineserver" -k
-						rm -rf "${BUILD_DIR}/test-prefix"
+        "${build}/bin/wineserver" -k
+		rm -rf "${BUILD_DIR}/test-prefix"
 
 		if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ]; then
   			if [ -f "${build}"/bin/wine64 ]; then

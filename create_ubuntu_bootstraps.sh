@@ -116,6 +116,7 @@ apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev l
 apt-get -y install libjpeg62-dev samba-dev libffi-dev
 apt-get -y install libpcsclite-dev libcups2-dev
 apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl libssl-dev libffi-dev
+apt-get -y install libxcursor-dev libxi-dev libxxf86vm-dev libxinerama-dev libxcomposite-dev ocl-icd-opencl-dev libpcap-dev libgnutls28-dev libdbus-1-dev libva-dev libasound2-dev
 apt-get -y install graphviz xmlto gettext --no-install-recommends
 apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev libpcap0.8 --purge --autoremove
 apt-get -y purge *gstreamer* --purge --autoremove
@@ -278,9 +279,9 @@ EOF
 		cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_ARM64}"/opt
 	fi
 	if [ "$ARCH" = "x86_64" ]; then
-	    # mkdir -p "${CHROOT_X32}"/opt
+	    mkdir -p "${CHROOT_X32}"/opt
 	    mkdir -p "${CHROOT_X64}"/opt
-    	# cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
+    	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
     	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
 	fi
 }
