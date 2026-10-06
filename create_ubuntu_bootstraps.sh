@@ -109,9 +109,9 @@ apt-get -y install software-properties-common
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
 add-apt-repository -y ppa:cybermax-dexter/mingw-w64-backport
 apt-get update
-apt-get -y install wget git gcc-15 g++-15 gcc-12 g++-12 gcc-mingw-w64 g++-mingw-w64 ninja-build flex clang lld qtbase5-dev pkg-config libfreetype-dev
 apt-get -y build-dep wine-development libsdl2 libvulkan1 python3
 # ccache gcc-15 g++-15
+apt-get -y install wget git gcc-15 g++-15 gcc-12 g++-12 gcc-mingw-w64 g++-mingw-w64 ninja-build flex clang lld qtbase5-dev pkg-config libfreetype-dev
 apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev
 apt-get -y install libjpeg62-dev samba-dev libffi-dev
 apt-get -y install libpcsclite-dev libcups2-dev
@@ -171,8 +171,8 @@ tar xf libgpg-error.tar.bz2
 tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-bash mingw-w64-build x86_64
-bash mingw-w64-build i686
+# bash mingw-w64-build x86_64
+# bash mingw-w64-build i686
 export CC=gcc-12
 export CXX=g++-12
 export CFLAGS="-O2"
