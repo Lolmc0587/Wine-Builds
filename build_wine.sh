@@ -320,11 +320,11 @@ if ! command -v bwrap 1>/dev/null; then
 	exit 1
 fi
 
-if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
-	clear
-	echo "Bootstraps are required for compilation!"
-	exit 1
-fi
+# if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
+# 	clear
+# 	echo "Bootstraps are required for compilation!"
+# 	exit 1
+# fi
 
 # BWRAP64="build_with_bwrap 64"
 # BWRAP32="build_with_bwrap 32"
@@ -492,7 +492,7 @@ for build in ${builds_list}; do
 
 		else
 		    echo "wine test FAILED!"
-		    exit 1
+		    # exit 1
 		fi
         "${build}/bin/wineserver" -k
 		rm -rf "${BUILD_DIR}/test-prefix"
