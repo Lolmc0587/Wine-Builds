@@ -106,7 +106,7 @@ export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
 export CROSSCFLAGS_X32="${CFLAGS_X32}"
 export CROSSCFLAGS_X64="${CFLAGS_X64}"
-export CROSSLDFLAGS="-Wl,-O1"
+# export CROSSLDFLAGS="-Wl,-O1"
 
 if [ "$USE_CCACHE" = "true" ]; then
 	export CC="ccache ${CC}"
@@ -335,7 +335,7 @@ export CFLAGS="${CFLAGS_X64}"
 export CXXFLAGS="${CFLAGS_X64}"
 export CROSSCFLAGS="${CROSSCFLAGS_X64}"
 export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
-
+unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 mkdir "${BUILD_DIR}"/build64
 cd "${BUILD_DIR}"/build64 || exit
 ${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
@@ -347,7 +347,7 @@ export CFLAGS="${CFLAGS_X32}"
 export CXXFLAGS="${CFLAGS_X32}"
 export CROSSCFLAGS="${CROSSCFLAGS_X32}"
 export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
-
+unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 mkdir "${BUILD_DIR}"/build32-tools
 cd "${BUILD_DIR}"/build32-tools || exit
 PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
@@ -359,7 +359,7 @@ export CFLAGS="${CFLAGS_X64}"
 export CXXFLAGS="${CFLAGS_X64}"
 export CROSSCFLAGS="${CROSSCFLAGS_X64}"
 export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
-
+unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 mkdir "${BUILD_DIR}"/build32
 cd "${BUILD_DIR}"/build32 || exit
 
@@ -376,7 +376,7 @@ export CFLAGS="${CFLAGS_X64}"
 export CXXFLAGS="${CFLAGS_X64}"
 export CROSSCFLAGS="${CROSSCFLAGS_X64}"
 export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
-
+unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 cd "${BUILD_DIR}"/build64 || exit
 ${BWRAP64} make -j$(nproc) install
 
