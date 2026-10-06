@@ -18,7 +18,7 @@
 
 ROOT_PATH="/opt/mingw"
 
-MINGW_W64_BRANCH="57b595039040eaa15bece85b7cc71d952281b269"
+MINGW_W64_BRANCH="master"
 BINUTILS_BRANCH="binutils-2_43-branch"
 GCC_BRANCH="releases/gcc-15"
 
@@ -38,8 +38,6 @@ Archs:
   i586    Windows 32-bit for old CPUs (Intel Pentium (MMX), AMD K5, K6, K6-2, K6-III)
   i686    Windows 32-bit (Intel P6 [Pentium Pro], AMD K7 and newer)
   x86_64  Windows 64-bit
-  aarch64  Windows ARM64-bit
-  arm64ec Windows ARM64EC-bit (x64 emulation compatible)
 
 Options:
   -h, --help                   show help
@@ -128,10 +126,9 @@ download_sources()
     change_dir "$SRC_PATH"
 
     execute "downloading MinGW-w64 source" "" \
-            git clone https://git.code.sf.net/p/mingw-w64/mingw-w64 mingw-w64
+        git clone --depth 1 -b "$MINGW_W64_BRANCH" \
+            https://git.code.sf.net/p/mingw-w64/mingw-w64 mingw-w64
 
-    execute "checking out MinGW-w64 commit" "" \
-        git -C mingw-w64 checkout "$MINGW_W64_BRANCH"
     execute "downloading Binutils source" "" \
         git clone --depth 1 -b "$BINUTILS_BRANCH" \
             https://gitlab.com/gnutools/binutils-gdb.git binutils
@@ -165,12 +162,6 @@ build()
     if [ "$arch" = "i586" ] || [ "$arch" = "i686" ]; then
         local x86_dwarf2="--disable-sjlj-exceptions --with-dwarf2"
         local crt_lib="--enable-lib32 --disable-lib64"
-    elif [ "$arch" = "aarch64" ];  then
-        local x86_dwarf2=""
-        local crt_lib="--disable-lib32 --disable-lib64 --enable-libarm64"
-    elif [ "$arch" = "arm64ec" ]; then
-        local x86_dwarf2=""
-        local crt_lib="--disable-lib32 --disable-lib64 --enable-libarm64 --enable-arm64x"
     else
         local x86_dwarf2=""
         local crt_lib="--enable-lib64 --disable-lib32"
@@ -369,12 +360,6 @@ while :; do
         x86_64)
             BUILD_X86_64=1
             ;;
-        aarch64)
-            BUILD_AARCH64=1
-            ;;
-        arm64ec)
-            BUILD_ARM64EC=1
-            ;;
         --)
             shift
             break
@@ -392,7 +377,7 @@ while :; do
     shift
 done
 
-NUM_BUILDS=$((BUILD_I586 + BUILD_I686 + BUILD_X86_64 + BUILD_AARCH64 + BUILD_ARM64EC))
+NUM_BUILDS=$((BUILD_I586 + BUILD_I686 + BUILD_X86_64))
 if [ "$NUM_BUILDS" -eq 0 ]; then
     arg_error "no ARCH was specified"
 fi
@@ -436,14 +421,10 @@ if [ "$PREFIX" ]; then
     I586_PREFIX="$PREFIX"
     I686_PREFIX="$PREFIX"
     X86_64_PREFIX="$PREFIX"
-    AARCH64_PREFIX="$PREFIX"
-    ARM64EC_PREFIX="$PREFIX"
 else
     I586_PREFIX="$ROOT_PATH/i586"
     I686_PREFIX="$ROOT_PATH/i686"
     X86_64_PREFIX="$ROOT_PATH/x86_64"
-    AARCH64_PREFIX="$ROOT_PATH/aarch64"
-    ARM64EC_PREFIX="$ROOT_PATH/arm64ec"
 fi
 
 CURRENT_STEP=1
@@ -475,7 +456,6 @@ for i in mpc isl mpfr gmp; do
 done
 
 export CFLAGS="-O2"
-
 export CXXFLAGS="-O2"
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
@@ -489,16 +469,6 @@ fi
 if [ "$BUILD_I686" ]; then
     build i686 "$I686_PREFIX"
     ADD_TO_PATH+=("'$I686_PREFIX/bin'")
-fi
-
-if [ "$BUILD_AARCH64" ]; then
-    build aarch64 "$AARCH64_PREFIX"
-    ADD_TO_PATH+=("'$AARCH64_PREFIX/bin'")
-fi
-
-if [ "$BUILD_ARM64EC" ]; then
-    build arm64ec "$ARM64EC_PREFIX"
-    ADD_TO_PATH+=("'$ARM64EC_PREFIX/bin'")
 fi
 
 if [ "$BUILD_X86_64" ]; then
