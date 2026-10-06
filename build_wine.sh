@@ -483,7 +483,7 @@ for build in ${builds_list}; do
 						
 		else
 		    echo "wine test FAILED!"
-		    # exit 1
+		    exit 1
 		fi
 		bash	"${build}/bin/wineserver" -k
 						rm -rf "${BUILD_DIR}/test-prefix"
