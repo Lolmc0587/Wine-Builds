@@ -92,8 +92,8 @@ export BOOTSTRAP_X32="${MAINDIR}/jammy_32_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-export CC="gcc-15"
-export CXX="g++-15"
+export CC="clang"
+export CXX="clang++"
 
 export CROSSCC_X32="i686-w64-mingw32-gcc"
 export CROSSCXX_X32="i686-w64-mingw32-g++"
@@ -320,98 +320,105 @@ if ! command -v bwrap 1>/dev/null; then
 	exit 1
 fi
 
-# if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
-# 	clear
-# 	echo "Bootstraps are required for compilation!"
-# 	exit 1
-# fi
+if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
+	clear
+	echo "Bootstraps are required for compilation!"
+	exit 1
+fi
 
 BWRAP64="build_with_bwrap 64"
 BWRAP32="build_with_bwrap 32"
 #
-# export CROSSCC="${CROSSCC_X64}"
-# export CROSSCXX="${CROSSCXX_X64}"
-# export CFLAGS="${CFLAGS_X64}"
-# export CXXFLAGS="${CFLAGS_X64}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
-#
-# mkdir "${BUILD_DIR}"/build64
-# cd "${BUILD_DIR}"/build64 || exit
-# ${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
-# ${BWRAP64} make -j$(nproc)
-#
-# export CROSSCC="${CROSSCC_X32}"
-# export CROSSCXX="${CROSSCXX_X32}"
-# export CFLAGS="${CFLAGS_X32}"
-# export CXXFLAGS="${CFLAGS_X32}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X32}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
-#
-# mkdir "${BUILD_DIR}"/build32-tools
-# cd "${BUILD_DIR}"/build32-tools || exit
-# PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
-# ${BWRAP32} make -j$(nproc) install
-#
-# export CFLAGS="${CFLAGS_X64}"
-# export CXXFLAGS="${CFLAGS_X64}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
-#
-# mkdir "${BUILD_DIR}"/build32
-# cd "${BUILD_DIR}"/build32 || exit
-# PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
-# ${BWRAP32} make -j$(nproc) install
-#
-# export CROSSCC="${CROSSCC_X64}"
-# export CROSSCXX="${CROSSCXX_X64}"
-# export CFLAGS="${CFLAGS_X64}"
-# export CXXFLAGS="${CFLAGS_X64}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
-#
-# cd "${BUILD_DIR}"/build64 || exit
-# ${BWRAP64} make -j$(nproc) install
+export CROSSCC="${CROSSCC_X64}"
+export CROSSCXX="${CROSSCXX_X64}"
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+
+mkdir "${BUILD_DIR}"/build64
+cd "${BUILD_DIR}"/build64 || exit
+${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+${BWRAP64} make -j$(nproc)
+
+export CROSSCC="${CROSSCC_X32}"
+export CROSSCXX="${CROSSCXX_X32}"
+export CFLAGS="${CFLAGS_X32}"
+export CXXFLAGS="${CFLAGS_X32}"
+export CROSSCFLAGS="${CROSSCFLAGS_X32}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+
+mkdir "${BUILD_DIR}"/build32-tools
+cd "${BUILD_DIR}"/build32-tools || exit
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} \
+    --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+${BWRAP32} make -j$(nproc) install
+
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+
+mkdir "${BUILD_DIR}"/build32
+cd "${BUILD_DIR}"/build32 || exit
+
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+${BWRAP32} "${BUILD_DIR}"/wine/configure \
+    --with-wine64="${BUILD_DIR}"/build64 \
+    --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} \
+    --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
+${BWRAP32} make -j$(nproc) install
+
+export CROSSCC="${CROSSCC_X64}"
+export CROSSCXX="${CROSSCXX_X64}"
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+
+cd "${BUILD_DIR}"/build64 || exit
+${BWRAP64} make -j$(nproc) install
 
 # Clear strict cross-compiler overrides so Wine can auto-detect all of them
-unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
-
-# Make sure the llvm-mingw bin directory is in your PATH
-# export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
-export PATH="${MAINDIR}/mingw/bin:$PATH"
-mkdir -p "${BUILD_DIR}/wine-build-32"
-cd "${BUILD_DIR}/wine-build-32" || exit
-
-# Configure Wine to build ALL architectures for New WoW64
-${BWRAP64} "${BUILD_DIR}/wine/configure" \
-    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
-    --enable-archs=i386 \
-    ${WINE_BUILD_OPTIONS}
-
-# Build and install everything
-${BWRAP64} make -j$(nproc) install
-
-mkdir -p "${BUILD_DIR}/wine-build-64"
-cd "${BUILD_DIR}/wine-build-64" || exit
-
-${BWRAP64} "${BUILD_DIR}/wine/configure" \
-    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
-    --enable-archs=x86_64,i386 \
-    ${WINE_BUILD_OPTIONS}
-
-# Build and install everything
-${BWRAP64} make -j$(nproc) install
-
-mkdir -p "${BUILD_DIR}/wine-build-wow64"
-cd "${BUILD_DIR}/wine-build-wow64" || exit
-${BWRAP64} "${BUILD_DIR}/wine/configure" \
-    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64-wow64" \
-    --enable-archs=x86_64,i386 \
-    --enable-win64 \
-    ${WINE_BUILD_OPTIONS}
-
-# Build and install everything
-${BWRAP64} make -j$(nproc) install
+# unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
+#
+# # Make sure the llvm-mingw bin directory is in your PATH
+# # export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
+# export PATH="${MAINDIR}/mingw/bin:$PATH"
+# mkdir -p "${BUILD_DIR}/wine-build-32"
+# cd "${BUILD_DIR}/wine-build-32" || exit
+#
+# # Configure Wine to build ALL architectures for New WoW64
+# ${BWRAP64} "${BUILD_DIR}/wine/configure" \
+#     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
+#     --enable-archs=i386 \
+#     ${WINE_BUILD_OPTIONS}
+#
+# # Build and install everything
+# ${BWRAP64} make -j$(nproc) install
+#
+# mkdir -p "${BUILD_DIR}/wine-build-64"
+# cd "${BUILD_DIR}/wine-build-64" || exit
+#
+# ${BWRAP64} "${BUILD_DIR}/wine/configure" \
+#     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
+#     --enable-archs=x86_64,i386 \
+#     ${WINE_BUILD_OPTIONS}
+#
+# # Build and install everything
+# ${BWRAP64} make -j$(nproc) install
+#
+# mkdir -p "${BUILD_DIR}/wine-build-wow64"
+# cd "${BUILD_DIR}/wine-build-wow64" || exit
+# ${BWRAP64} "${BUILD_DIR}/wine/configure" \
+#     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64-wow64" \
+#     --enable-archs=x86_64,i386 \
+#     --enable-win64 \
+#     ${WINE_BUILD_OPTIONS}
+#
+# # Build and install everything
+# ${BWRAP64} make -j$(nproc) install
 
 echo
 echo "Compilation complete"
@@ -444,7 +451,7 @@ for build in ${builds_list}; do
 		fi
 		echo "Stripping debug symbols to reduce size..."
 
-         if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ] || [ "${build}" = "wine-${BUILD_NAME}-amd64" ]; then
+        if [ "${build}" = "wine-${BUILD_NAME}-amd64-wow64" ] || [ "${build}" = "wine-${BUILD_NAME}-amd64" ]; then
 #      		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 #
 #      		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
@@ -472,7 +479,7 @@ for build in ${builds_list}; do
 		unset DISPLAY
 
 		# 3. Initialize the prefix headlessly (creates the registry and folders)
-	 "${build}/bin/wineboot" -u
+	    "${build}/bin/wineboot" -u
 
 		# 4. Execute a built-in Windows binary (cmd.exe)
 		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
@@ -480,7 +487,7 @@ for build in ${builds_list}; do
 
 		if [ $? -eq 0 ]; then
 		    echo "wine test passed!"
-						
+
 		else
 		    echo "wine test FAILED!"
 		    exit 1
