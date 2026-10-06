@@ -390,7 +390,7 @@ mkdir -p "${BUILD_DIR}/wine-build-32"
 cd "${BUILD_DIR}/wine-build-32" || exit
 
 # Configure Wine to build ALL architectures for New WoW64
-${BWRAP64} "${BUILD_DIR}/wine/configure" \
+${BWRAP32} "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
     --enable-archs=i386 \
     ${WINE_BUILD_OPTIONS}
@@ -462,11 +462,11 @@ for build in ${builds_list}; do
              cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/x86_64-windows/"
          fi
          if [ "${build}" = "wine-${BUILD_NAME}-x86" ]; then
-     		${BWRAP64} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+     		${BWRAP32} find "${BUILD_DIR}/${build}/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 
-     		${BWRAP64} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+     		${BWRAP32} find "${BUILD_DIR}/${build}/lib" -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
 
-     		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
+     		${BWRAP32} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
          fi
         # Inject i386 (x86 WoW64) MinGW runtimes
         cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
