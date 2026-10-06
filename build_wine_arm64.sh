@@ -36,8 +36,8 @@ export BOOTSTRAP_ARM64="${MAINDIR}/jammy_arm64_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-export CC="clang"
-export CXX="clang++"
+export CC="gcc"
+export CXX="g++"
 
 export CROSSCC_X32="i686-w64-mingw32-gcc"
 export CROSSCXX_X32="i686-w64-mingw32-g++"
