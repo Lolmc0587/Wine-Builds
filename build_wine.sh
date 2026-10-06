@@ -460,7 +460,31 @@ for build in ${builds_list}; do
 #
 #      		${BWRAP64} find "${BUILD_DIR}/${build}/lib/wine" \( -name "*.dll" -o -name "*.exe" \) -exec llvm-strip --strip-unneeded {} + 2>/dev/null || true
          #fi
+								echo "Testing Wine..."
 
+		# 1. Point to the newly built binaries
+		#export PATH="${BUILD_DIR}/wine-${BUILD_NAME}-arm64/bin:$PATH"
+		export WINEPREFIX="${BUILD_DIR}/test-prefix"
+
+		# 2. Disable debug spam and ensure no display is expected
+		export WINEDEBUG=-all
+		unset DISPLAY
+
+		# 3. Initialize the prefix headlessly (creates the registry and folders)
+	 bash	"${build}/bin/wineboot" -u
+
+		# 4. Execute a built-in Windows binary (cmd.exe)
+		# Since cmd.exe is a Windows PE binary, this forces Wine to invoke FEX-Emu
+		bash	"${build}/bin/wine" cmd.exe /c echo "Successfully executed Windows CMD on GitHub Actions!"
+
+		if [ $? -eq 0 ]; then
+		    echo "wine test passed!"
+						bash	"${build}/bin/wineserver -k"
+						rm -rf "${BUILD_DIR}/test-prefix"
+		else
+		    echo "wine test FAILED!"
+		    exit 1
+		fi
         # Inject i386 (x86 WoW64) MinGW runtimes
         cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/${build}/lib/wine/i386-windows/"
 
