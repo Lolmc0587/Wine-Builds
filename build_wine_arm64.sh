@@ -212,7 +212,7 @@ cd "${BUILD_DIR}/wine-build" || exit
 # Configure Wine to build ALL architectures for New WoW64
 # PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
 ${BWRAP64} "${BUILD_DIR}/wine/configure" \
-    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
+    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-fex-arm64" \
     --enable-archs=aarch64,i386,arm64ec \
     ${WINE_BUILD_OPTIONS}
 
@@ -229,7 +229,7 @@ if [ "$BUILD_FEX" = "true" ]; then
     mkdir -p "${BUILD_DIR}/fex/build-wow64"
     cd "${BUILD_DIR}/fex/build-wow64" || exit 1
     ${BWRAP64} env -u CC -u CXX LDFLAGS="-static" cmake -G Ninja \
-        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
+        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-fex-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/aarch64-windows" \
         -DCMAKE_TOOLCHAIN_FILE="../Data/CMake/toolchain_mingw.cmake" \
         -DMINGW_TRIPLE=aarch64-w64-mingw32 \
@@ -246,7 +246,7 @@ if [ "$BUILD_FEX" = "true" ]; then
     mkdir -p "${BUILD_DIR}/fex/build-arm64ec"
     cd "${BUILD_DIR}/fex/build-arm64ec" || exit 1
     ${BWRAP64} env -u CC -u CXX LDFLAGS="-static" cmake -G Ninja \
-        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-arm64" \
+        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/wine-${BUILD_NAME}-fex-arm64" \
         -DCMAKE_INSTALL_LIBDIR="lib/wine/arm64ec-windows" \
         -DCMAKE_TOOLCHAIN_FILE="../Data/CMake/toolchain_mingw.cmake" \
         -DMINGW_TRIPLE=arm64ec-w64-mingw32 \
