@@ -92,21 +92,34 @@ export BOOTSTRAP_X32="${MAINDIR}/jammy_32_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-export CC="clang"
-export CXX="clang++"
+export CC=/opt/mingw/bin/clang
+export LD=/opt/mingw/bin/ld
+export CXX="/opt/mingw/bin/clang++"
 
-export CROSSCC_X32="i686-w64-mingw32-gcc"
-export CROSSCXX_X32="i686-w64-mingw32-g++"
-export CROSSCC_X64="x86_64-w64-mingw32-gcc"
-export CROSSCXX_X64="x86_64-w64-mingw32-g++"
+export CROSSCC_X32="/opt/mingw/bin/i686-w64-mingw32-gcc"
+export CROSSCXX_X32="/opt/mingw/bin/i686-w64-mingw32-g++"
+export CROSSCC_X64="/opt/mingw/bin/x86_64-w64-mingw32-gcc"
+export CROSSCXX_X64="/opt/mingw/bin/x86_64-w64-mingw32-g++"
 
+# Native build flags for clang (host compilation)
+export CFLAGS="-march=native -O3"
+export CXXFLAGS="-march=native -O3"
+
+# 32-bit cross-compile flags
 export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse -O3"
+export CXXFLAGS_X32="-march=i686 -msse2 -mfpmath=sse -O3"
+
+# 64-bit cross-compile flags
 export CFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse -O3"
+export CXXFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse -O3"
+
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
+# Cross-compiler flags (MinGW)
 export CROSSCFLAGS_X32="${CFLAGS_X32}"
+export CROSSCXXFLAGS_X32="${CXXFLAGS_X32}"
 export CROSSCFLAGS_X64="${CFLAGS_X64}"
-# export CROSSLDFLAGS="-Wl,-O1"
+export CROSSCXXFLAGS_X64="${CXXFLAGS_X64}"
 
 if [ "$USE_CCACHE" = "true" ]; then
 	export CC="ccache ${CC}"
@@ -329,46 +342,44 @@ unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 BWRAP64="build_with_bwrap 64"
 BWRAP32="build_with_bwrap 32"
 #
-# export CROSSCC="${CROSSCC_X64}"
-# export CROSSCXX="${CROSSCXX_X64}"
-# export CFLAGS="${CFLAGS_X64}"
-# export CXXFLAGS="${CFLAGS_X64}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCC="${CROSSCC_X64}"
+export CROSSCXX="${CROSSCXX_X64}"
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build64
 cd "${BUILD_DIR}"/build64 || exit
-
-${BWRAP64} "/opt/mingw/bin/clang-target-wrapper.sh" PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
-    "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
+${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
 ${BWRAP64} make -j$(nproc)
 
-# export CROSSCC="${CROSSCC_X32}"
-# export CROSSCXX="${CROSSCXX_X32}"
-# export CFLAGS="${CFLAGS_X32}"
-# export CXXFLAGS="${CFLAGS_X32}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X32}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+export CROSSCC="${CROSSCC_X32}"
+export CROSSCXX="${CROSSCXX_X32}"
+export CFLAGS="${CFLAGS_X32}"
+export CXXFLAGS="${CFLAGS_X32}"
+export CROSSCFLAGS="${CROSSCFLAGS_X32}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
 # unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 mkdir "${BUILD_DIR}"/build32-tools
 cd "${BUILD_DIR}"/build32-tools || exit
 
-${BWRAP32} "/opt/mingw/bin/clang-target-wrapper.sh" PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
-    "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} \
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
+${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} \
     --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
 ${BWRAP32} make -j$(nproc) install
 
-# export CFLAGS="${CFLAGS_X64}"
-# export CXXFLAGS="${CFLAGS_X64}"
-# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 #
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+
 mkdir "${BUILD_DIR}"/build32
 cd "${BUILD_DIR}"/build32 || exit
-
-
-${BWRAP32} "/opt/mingw/bin/clang-target-wrapper.sh" PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
-    "${BUILD_DIR}"/wine/configure \
+${BWRAP32} "${BUILD_DIR}"/wine/configure \
     --with-wine64="${BUILD_DIR}"/build64 \
     --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} \
     --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
