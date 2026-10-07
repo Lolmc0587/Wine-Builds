@@ -8,35 +8,33 @@
 ## About 5.5 GB of free space is required
 ## And additional 2.5 GB is required for Wine compilation
 
+if [ "$EUID" != 0 ]; then
+	echo "This script requires root rights!"
+	exit 1
+fi
+
 if ! command -v debootstrap 1>/dev/null || ! command -v perl 1>/dev/null; then
 	echo "Please install debootstrap and perl and run the script again"
 	exit 1
 fi
 
-export ARCH="$(uname -m)"
 # Keep in mind that although you can choose any version of Ubuntu/Debian
 # here, but this script has only been tested with Ubuntu 18.04 Bionic
-export CHROOT_DISTRO="jammy"
-if [ "$ARCH" = "aarch64" ]; then
-	export CHROOT_MIRROR="https://ports.ubuntu.com/ubuntu-ports/"
-else
-	export CHROOT_MIRROR="http://archive.ubuntu.com/ubuntu"
-fi
+export CHROOT_DISTRO="bionic"
+export CHROOT_MIRROR="https://ftp.uni-stuttgart.de/ubuntu/"
+
 # Set your preferred path for storing chroots
 # Also don't forget to change the path to the chroots in the build_wine.sh
 # script, if you are going to use it
 export MAINDIR=/opt/chroots
-export CHROOT_ARM64="${MAINDIR}"/${CHROOT_DISTRO}_arm64_chroot
-export CHROOT_X64="${MAINDIR}"/${CHROOT_DISTRO}_64_chroot
-export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}_32_chroot
+export CHROOT_X64="${MAINDIR}"/${CHROOT_DISTRO}64_chroot
+export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}32_chroot
 
 prepare_chroot () {
 	if [ "$1" = "32" ]; then
 		CHROOT_PATH="${CHROOT_X32}"
-	elif [ "$1" = "64" ]; then
-		CHROOT_PATH="${CHROOT_X64}"
 	else
-	    CHROOT_PATH="${CHROOT_ARM64}"
+		CHROOT_PATH="${CHROOT_X64}"
 	fi
 
 	echo "Unmount chroot directories. Just in case."
@@ -91,7 +89,9 @@ create_build_scripts () {
 
 	cat <<EOF > "${MAINDIR}"/prepare_chroot.sh
 #!/bin/bash
+
 apt-get update
+apt-get -y install nano
 apt-get -y install locales
 echo ru_RU.UTF_8 UTF-8 >> /etc/locale.gen
 echo en_US.UTF_8 UTF-8 >> /etc/locale.gen
@@ -110,44 +110,53 @@ add-apt-repository -y ppa:ubuntu-toolchain-r/test
 add-apt-repository -y ppa:cybermax-dexter/mingw-w64-backport
 apt-get update
 apt-get -y build-dep wine-development libsdl2 libvulkan1 python3
-# ccache gcc-15 g++-15
-apt-get -y install wget git gcc-12 g++-12 gcc-mingw-w64 g++-mingw-w64 ninja-build flex clang lld qtbase5-dev pkg-config libfreetype-dev
+apt-get -y install ccache gcc-12 g++-12 gcc-15 g++-15 wget git gcc-mingw-w64 g++-mingw-w64 ninja-build
 apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev
 apt-get -y install libjpeg62-dev samba-dev libffi-dev
 apt-get -y install libpcsclite-dev libcups2-dev
-apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl libssl-dev libffi-dev
-apt-get -y install libxcursor-dev libxi-dev libxxf86vm-dev libxinerama-dev libxcomposite-dev ocl-icd-opencl-dev libpcap-dev libgnutls28-dev libdbus-1-dev libva-dev libasound2-dev
-apt-get -y install graphviz xmlto gettext --no-install-recommends
-apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap libpcap-dev  --purge --autoremove
+apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl
+apt-get -y install graphviz xmlto --no-install-recommends
+apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev libpcap0.8 --purge --autoremove
 apt-get -y purge *gstreamer* --purge --autoremove
 apt-get -y clean
 apt-get -y autoclean
-export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/local/bin:\${PATH}"
 mkdir /opt/build_libs
 cd /opt/build_libs
 wget -O sdl.tar.gz https://www.libsdl.org/release/SDL2-${sdl2_version}.tar.gz
 wget -O faudio.tar.gz https://github.com/FNA-XNA/FAudio/archive/${faudio_version}.tar.gz
+sleep 5
 wget -O vulkan-loader.tar.gz https://github.com/KhronosGroup/Vulkan-Loader/archive/v${vulkan_loader_version}.tar.gz
+sleep 5
 wget -O vulkan-headers.tar.gz https://github.com/KhronosGroup/Vulkan-Headers/archive/v${vulkan_headers_version}.tar.gz
+sleep 5
 wget -O spirv-headers.tar.gz https://github.com/KhronosGroup/SPIRV-Headers/archive/${spirv_headers_version}.tar.gz
 wget -O libpcap.tar.gz https://www.tcpdump.org/release/libpcap-${libpcap_version}.tar.gz
+sleep 5
 wget -O libxkbcommon.tar.gz https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-${libxkbcommon_version}.tar.gz
 wget -O python3.tar.gz https://www.python.org/ftp/python/${python3_version}/Python-${python3_version}.tgz
+sleep 5
 wget -O meson.tar.gz https://github.com/mesonbuild/meson/releases/download/${meson_version}/meson-${meson_version}.tar.gz
+sleep 5
 wget -O cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}.tar.gz
+sleep 5
 wget -O ccache.tar.gz https://github.com/ccache/ccache/releases/download/v${ccache_version}/ccache-${ccache_version}.tar.gz
 wget -O libglvnd.tar.gz https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v${libglvnd_version}/libglvnd-v${libglvnd_version}.tar.gz
-wget -O bison.tar.xz https://mirrors.kernel.org/gnu/bison/bison-${bison_version}.tar.xz
+wget -O bison.tar.xz https://ftp.gnu.org/gnu/bison/bison-${bison_version}.tar.xz
 wget -O wayland.tar.xz https://gitlab.freedesktop.org/wayland/wayland/-/releases/${wayland_version}/downloads/wayland-${wayland_version}.tar.xz
 wget -O wayland-protocols.tar.xz https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${wayland_protocols_version}/downloads/wayland-protocols-${wayland_protocols_version}.tar.xz
 wget -O gnutls.tar.xz https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-${gnutls_version}.tar.xz
-wget -O nettle.tar.gz https://mirrors.kernel.org/gnu/nettle/nettle-${nettle_version}.tar.gz
+wget -O nettle.tar.gz https://ftp.gnu.org/gnu/nettle/nettle-${nettle_version}.tar.gz
+sleep 5
 wget -O p11-kit.tar.xz https://github.com/p11-glue/p11-kit/releases/download/${p11_kit_version}/p11-kit-${p11_kit_version}.tar.xz
 wget -O libgpg-error.tar.bz2 https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${libgpg_error_version}.tar.bz2
 wget -O libgcrypt.tar.bz2 https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-${libgcrypt_version}.tar.bz2
+sleep 5
 wget -O /usr/include/linux/ntsync.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.15/main/include/uapi/linux/ntsync.h
+sleep 5
 wget -O /usr/include/linux/userfaultfd.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.15/main/include/uapi/linux/userfaultfd.h
+if [ -d /usr/lib/i386-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable_4.0.3~bionic_i386.deb; fi
+if [ -d /usr/lib/x86_64-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-amd64/wine-stable_4.0.3~bionic_amd64.deb; fi
 git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git -b 1.22
 wget https://raw.githubusercontent.com/Kron4ek/Wine-Builds/refs/heads/master/mingw-w64-build
 tar xf sdl.tar.gz
@@ -171,73 +180,53 @@ tar xf libgpg-error.tar.bz2
 tar xf libgcrypt.tar.bz2
 tar xf meson.tar.gz -C /usr/local
 ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-# bash mingw-w64-build x86_64
-# bash mingw-w64-build i686
+bash mingw-w64-build x86_64
+bash mingw-w64-build i686
 export CC=gcc-12
 export CXX=g++-12
 export CFLAGS="-O2"
 export CXXFLAGS="-O2"
-
-echo "Installing cmake..."
 cd cmake-${cmake_version}
 ./bootstrap --parallel=$(nproc)
 make -j$(nproc) install
-
-echo "Installing ccache..."
 cd ../ && mkdir build && cd build
 cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
-
-echo "Installing wayland..."
+cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../Vulkan-Loader-${vulkan_loader_version}
+make -j$(nproc)
+make install
+cd ../ && rm -r build && mkdir build && cd build
+cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
+cd ../ && dpkg -x wine.deb .
+cp opt/wine-stable/bin/widl /usr/bin
+rm -r build && mkdir build && cd build
+../libpcap-${libpcap_version}/configure && make -j$(nproc) install
+cd ../ && rm -r build && mkdir build && cd build
+../Python-${python3_version}/configure --enable-optimizations
+make -j$(nproc)
+make -j$(nproc) install
+pip3 install setuptools
+cd ../gstreamer
+meson setup build
+ninja -C build
+ninja -C build install
+cd ../bison-${bison_version}
+./configure
+make -j$(nproc) install
 cd ../wayland-${wayland_version}
-meson setup build -Ddocumentation=false
+meson setup build
 meson compile -C build
 meson install -C build
-
-echo "Installing wayland-protocols..."
 cd ../wayland-protocols-${wayland_protocols_version}
 meson setup build
 meson compile -C build
 meson install -C build
-cd ../ && rm -r build && mkdir build && cd build
-
-echo "Installing SDL2..."
-cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
-
-echo "Installing FAudio..."
-cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
-cd ../ && rm -r build && mkdir build && cd build
-
-echo "Installing Vulkan Headers..."
-cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
-cd ../ && rm -r build && mkdir build && cd build
-
-echo "Installing Vulkan Loader..."
-cmake ../Vulkan-Loader-${vulkan_loader_version}
-make -j$(nproc)
-make install
-
-echo "Installing SPIRV Headers..."
-cd ../ && rm -r build && mkdir build && cd build
-cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
-# cd ../ && dpkg -x wine.deb .
-cp opt/wine-stable/bin/widl /usr/bin
-rm -r build && mkdir build && cd build
-
-echo "Installing libpcap..."
-../libpcap-${libpcap_version}/configure && make -j$(nproc) install
-cd ../ && rm -r build && mkdir build && cd build
-
-echo "Installing Python..."
-../Python-${python3_version}/configure --enable-optimizations
-
-echo "Installing bison..."
-make -j$(nproc)
-make -j$(nproc) install
-pip3 install setuptools
-cd ../bison-${bison_version}
-./configure
-make -j$(nproc) install
 cd ../libxkbcommon-xkbcommon-${libxkbcommon_version}
 meson setup build -Denable-docs=false
 meson compile -C build
@@ -248,13 +237,7 @@ meson compile -C build
 meson install -C build
 cd ../nettle-${nettle_version}
 ./configure
-echo "Installing nettle..."
 make -j$(nproc) install
-cd ../gstreamer
-echo "Installing gstreamer..."
-meson setup build
-ninja -C build
-ninja -C build install
 cd ../p11-kit-${p11_kit_version}
 meson setup build
 meson compile -C build
@@ -268,49 +251,25 @@ make -j$(nproc) install
 cd ../libgcrypt-${libgcrypt_version}
 ./configure
 make -j$(nproc) install
-
 cd /opt && rm -r /opt/build_libs
-echo "Dependencies built successfully at ${PREFIX}!"
 EOF
 
 	chmod +x "${MAINDIR}"/prepare_chroot.sh
-	if [ "$ARCH" = "aarch64" ]; then
-	    mkdir -p "${CHROOT_ARM64}"/opt
-		cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_ARM64}"/opt
-	fi
-	if [ "$ARCH" = "x86_64" ]; then
-	    # mkdir -p "${CHROOT_X32}"/opt
-	    mkdir -p "${CHROOT_X64}"/opt
-    	# cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
-    	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
-	fi
+	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
+	mv "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
 }
 
 mkdir -p "${MAINDIR}"
+
+debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
+debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
+
 create_build_scripts
+prepare_chroot 32
+prepare_chroot 64
 
-if [ "$ARCH" = "aarch64" ]; then
-	debootstrap --arch arm64 $CHROOT_DISTRO "${CHROOT_ARM64}" $CHROOT_MIRROR
-	prepare_chroot aarch64
-	rm "${CHROOT_ARM64}"/opt/prepare_chroot.sh
-fi
-if [ "$ARCH" = "x86_64" ]; then
-    # --variant=minbase fix for console-setup-linux errors
-    # debootstrap --arch i386 --variant=minbase $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
-	debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
-	echo "Preparing i386 chroots..."
-	# prepare_chroot 32
-	echo "Preparing amd64 chroots..."
-	prepare_chroot 64
-	rm "${CHROOT_X64}"/opt/prepare_chroot.sh
-	# rm "${CHROOT_X32}"/opt/prepare_chroot.sh
-fi
-
-# Download and extract llvm-mingw toolchain
-mkdir -p "${MAINDIR}"/mingw
-wget -q --show-progress -O llvm-mingw.tar.xz "https://github.com/bylaws/llvm-mingw/releases/download/20250920/llvm-mingw-20250920-ucrt-ubuntu-22.04-${ARCH}.tar.xz"
-sudo tar xf llvm-mingw.tar.xz -C "${MAINDIR}"/mingw --strip-components=1
-rm llvm-mingw.tar.xz
+rm "${CHROOT_X64}"/opt/prepare_chroot.sh
+rm "${CHROOT_X32}"/opt/prepare_chroot.sh
 
 clear
 echo "Done"
