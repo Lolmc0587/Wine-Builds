@@ -92,10 +92,7 @@ export BOOTSTRAP_X32="${MAINDIR}/jammy_32_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-# export CC="/opt/mingw/bin/clang"
-# export CXX="/opt/mingw/bin/clang++"
-export CC="gcc"
-export CXX="g++"
+
 
 export CROSSCC_X64="/opt/mingw/bin/clang --target=x86_64-w64-mingw32"
 export CROSSCXX_X64="/opt/mingw/bin/clang++ --target=x86_64-w64-mingw32"
@@ -341,7 +338,12 @@ fi
 unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 BWRAP64="build_with_bwrap 64"
 BWRAP32="build_with_bwrap 32"
-#
+
+export CC="/opt/mingw/bin/clang"
+export CXX="/opt/mingw/bin/clang++"
+# export CC="gcc"
+# export CXX="g++"
+export LD="/opt/mingw/bin/ld"
 export CROSSCC="${CROSSCC_X64}"
 export CROSSCXX="${CROSSCXX_X64}"
 export CFLAGS="${CFLAGS_X64}"
@@ -355,6 +357,12 @@ PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgcon
 ${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
 ${BWRAP64} make -j$(nproc)
 
+export CC="clang"
+export CXX="clang++"
+unset LD
+# export CC="gcc"
+# export CXX="g++"
+# export LD="/opt/mingw/bin/ld"
 export CROSSCC="${CROSSCC_X32}"
 export CROSSCXX="${CROSSCXX_X32}"
 export CFLAGS="${CFLAGS_X32}"
@@ -370,13 +378,16 @@ ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} \
     --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
 ${BWRAP32} make -j$(nproc) install
 
+export CC="/opt/mingw/bin/clang"
+export CXX="/opt/mingw/bin/clang++"
+# export CC="gcc"
+# export CXX="g++"
+export LD="/opt/mingw/bin/ld"
 export CFLAGS="${CFLAGS_X64}"
 export CXXFLAGS="${CFLAGS_X64}"
 export CROSSCFLAGS="${CROSSCFLAGS_X64}"
 export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 #
-
-
 mkdir "${BUILD_DIR}"/build32
 cd "${BUILD_DIR}"/build32 || exit
 PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
