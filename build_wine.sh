@@ -92,8 +92,8 @@ export BOOTSTRAP_X32="${MAINDIR}/jammy_32_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-export CC="clang"
-export CXX="clang++"
+export CC="/opt/mingw/bin/clang"
+export CXX="/opt/mingw/binclang++"
 
 export CROSSCC_X64="/opt/mingw/bin/clang --target=x86_64-w64-mingw32"
 export CROSSCXX_X64="/opt/mingw/bin/clang++ --target=x86_64-w64-mingw32"
