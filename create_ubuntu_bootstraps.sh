@@ -118,7 +118,7 @@ apt-get -y install libpcsclite-dev libcups2-dev
 apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl libssl-dev libffi-dev
 apt-get -y install libxcursor-dev libxi-dev libxxf86vm-dev libxinerama-dev libxcomposite-dev ocl-icd-opencl-dev libpcap-dev libgnutls28-dev libdbus-1-dev libva-dev libasound2-dev
 apt-get -y install graphviz xmlto gettext --no-install-recommends
-apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev libpcap0.8 --purge --autoremove
+apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap libpcap-dev  --purge --autoremove
 apt-get -y purge *gstreamer* --purge --autoremove
 apt-get -y clean
 apt-get -y autoclean
