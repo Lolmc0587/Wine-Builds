@@ -1,4 +1,4 @@
-name: Bootstraps CI Arm64 host
+name: Bootstraps CI Arm64
 
 on:
   schedule:
@@ -16,8 +16,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install debootstrap perl
-          chmod +x create_ubuntu_bootstraps.sh
-          sudo ./create_ubuntu_bootstraps.sh
+          chmod +x create_ubuntu_bootstraps_arm64.sh
+          sudo ./create_ubuntu_bootstraps_arm64.sh
 
           # Compress the installed prefix
           cd /opt
