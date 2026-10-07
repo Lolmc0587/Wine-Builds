@@ -92,7 +92,8 @@ export BOOTSTRAP_X32="${MAINDIR}/jammy_32_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-
+export CC="/opt/mingw/bin/clang"
+export CXX="/opt/mingw/bin/clang++"
 
 export CROSSCC_X64="/opt/mingw/bin/clang --target=x86_64-w64-mingw32"
 export CROSSCXX_X64="/opt/mingw/bin/clang++ --target=x86_64-w64-mingw32"
@@ -409,12 +410,12 @@ export PATH="${MAINDIR}/mingw/bin:$PATH"
 mkdir -p "${BUILD_DIR}/build32"
 cd "${BUILD_DIR}/build32" || exit
 
-export CROSSCC="${CROSSCC_X32}"
-export CROSSCXX="${CROSSCXX_X32}"
-export CFLAGS="${CFLAGS_X32}"
-export CXXFLAGS="${CFLAGS_X32}"
-export CROSSCFLAGS="${CROSSCFLAGS_X32}"
-export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+# export CROSSCC="${CROSSCC_X32}"
+# export CROSSCXX="${CROSSCXX_X32}"
+# export CFLAGS="${CFLAGS_X32}"
+# export CXXFLAGS="${CFLAGS_X32}"
+# export CROSSCFLAGS="${CROSSCFLAGS_X32}"
+# export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
 # Configure Wine to build ALL architectures for New WoW64
 PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
 ${BWRAP64}
@@ -426,12 +427,12 @@ ${BWRAP64}
 # Build and install everything
 ${BWRAP64} make -j$(nproc) install
 
-export CROSSCC="${CROSSCC_X64}"
-export CROSSCXX="${CROSSCXX_X64}"
-export CFLAGS="${CFLAGS_X64}"
-export CXXFLAGS="${CFLAGS_X64}"
-export CROSSCFLAGS="${CROSSCFLAGS_X64}"
-export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+# export CROSSCC="${CROSSCC_X64}"
+# export CROSSCXX="${CROSSCXX_X64}"
+# export CFLAGS="${CFLAGS_X64}"
+# export CXXFLAGS="${CFLAGS_X64}"
+# export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+# export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 mkdir -p "${BUILD_DIR}/build-64"
 cd "${BUILD_DIR}/build64" || exit
 PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
