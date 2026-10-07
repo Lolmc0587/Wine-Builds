@@ -36,19 +36,11 @@ export BOOTSTRAP_ARM64="${MAINDIR}/jammy_arm64_chroot"
 
 export scriptdir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-export CC="gcc"
-export CXX="g++"
+# export CC="gcc"
+# export CXX="g++"
+export CC="/opt/mingw/bin/clang"
+export CXX="/opt/mingw/bin/clang++"
 
-export CROSSCC_X32="i686-w64-mingw32-gcc"
-export CROSSCXX_X32="i686-w64-mingw32-g++"
-export CROSSCC_AARCH64="aarch64-w64-mingw32-gcc"
-export CROSSCXX_AARCH64="aarch64-w64-mingw32-g++"
-export CROSSCC_ARM64EC="arm64ec-w64-mingw32-gcc"
-export CROSSCXX_ARM64EC="arm64ec-w64-mingw32-g++"
-
-export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse -O3"
-export CFLAGS_AARCH64="-O3"
-export CFLAGS_ARM64EC="-O3"
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
 # Mount /opt/mingw (toolchain) explicitly inside the bwrap container
