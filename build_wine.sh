@@ -338,7 +338,7 @@ fi
 # 	echo "Bootstraps are required for compilation!"
 # 	exit 1
 # fi
-unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
+# unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 BWRAP64="build_with_bwrap 64"
 BWRAP32="build_with_bwrap 32"
 #
