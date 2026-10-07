@@ -407,8 +407,8 @@ unset CROSSCC CROSSCXX CROSSCFLAGS CROSSCXXFLAGS
 # Make sure the llvm-mingw bin directory is in your PATH
 # export PATH="${BOOTSTRAP_X32}/opt/mingw/bin:$PATH"
 export PATH="${MAINDIR}/mingw/bin:$PATH"
-mkdir -p "${BUILD_DIR}/build32"
-cd "${BUILD_DIR}/build32" || exit
+# mkdir -p "${BUILD_DIR}/build32"
+# cd "${BUILD_DIR}/build32" || exit
 
 # export CROSSCC="${CROSSCC_X32}"
 # export CROSSCXX="${CROSSCXX_X32}"
@@ -417,15 +417,15 @@ cd "${BUILD_DIR}/build32" || exit
 # export CROSSCFLAGS="${CROSSCFLAGS_X32}"
 # export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
 # Configure Wine to build ALL architectures for New WoW64
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
-${BWRAP64}
-    "${BUILD_DIR}/wine/configure" \
-    --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
-    --enable-archs=i386 \
-    ${WINE_BUILD_OPTIONS}
+# PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+#${BWRAP64}
+   # "${BUILD_DIR}/wine/configure" \
+   # --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-x86" \
+   # --enable-archs=i386 \
+ #   ${#WINE_BUILD_OPTIONS}
 
 # Build and install everything
-${BWRAP64} make -j$(nproc) install
+#${BWRAP64} make -j$(nproc) install
 
 # export CROSSCC="${CROSSCC_X64}"
 # export CROSSCXX="${CROSSCXX_X64}"
@@ -435,7 +435,7 @@ ${BWRAP64} make -j$(nproc) install
 # export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 mkdir -p "${BUILD_DIR}/build64"
 cd "${BUILD_DIR}/build64" || exit
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/x86_64-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
 ${BWRAP64}
     "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64" \
@@ -447,7 +447,7 @@ ${BWRAP64} make -j$(nproc) install
 
 mkdir -p "${BUILD_DIR}/build-wow64"
 cd "${BUILD_DIR}/build-wow64" || exit
-PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
+PKG_CONFIG_LIBDIR="/usr/local/lib/pkgconfig:/usr/local/lib/x86_64-linux-gnu/pkgconfig:/usr/local/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" \
 ${BWRAP64}
     "${BUILD_DIR}/wine/configure" \
     --prefix="${BUILD_DIR}/wine-${BUILD_NAME}-amd64-wow64" \
