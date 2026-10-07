@@ -178,8 +178,8 @@ if [ "$BUILD_FEX" = "true" ]; then
     fi
 fi
 cd "${BUILD_DIR}" || exit 1
-patch -d wine*/ -Np1 < "${scriptdir}/0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch"
-patch -d wine*/ -Np1 < "${scriptdir}/0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch"
+# patch -d wine*/ -Np1 < "${scriptdir}/0001-qcap-fix-Smart-Tee-preview-allocator-and-RGB32-negot.patch"
+# patch -d wine*/ -Np1 < "${scriptdir}/0002-qcap-fix-wow64-media-type-marshaling-in-v4l-backend.patch"
 
 cd wine || exit 1
 dlls/winevulkan/make_vulkan
@@ -297,16 +297,16 @@ for build in ${builds_list}; do
 		echo "Injecting MinGW runtime DLLs into Wine prefix..."
 
 		# Inject AArch64 MinGW runtimes
-		cp "${MAINDIR}/mingw/aarch64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/"
+		# cp "${MAINDIR}/mingw/aarch64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/aarch64-windows/"
 
 		# Inject ARM64EC MinGW runtimes
-		cp "${MAINDIR}/mingw/arm64ec-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/"
+		# cp "${MAINDIR}/mingw/arm64ec-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/arm64ec-windows/"
 
         # Inject i386 (x86 WoW64) MinGW runtimes
-        cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/i386-windows/"
+        # cp "${MAINDIR}/mingw/i686-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/i386-windows/"
 
         # Inject x86_64 MinGW runtimes
-        cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/x86_64-windows/"
+        # cp "${MAINDIR}/mingw/x86_64-w64-mingw32/bin/"*.dll "${BUILD_DIR}/wine-${BUILD_NAME}-arm64/lib/wine/x86_64-windows/"
 
        echo "Symlinking FEX-Emu engines to New WoW64 JIT targets..."
 
